@@ -1,0 +1,22 @@
+---
+title: "Notes for making talk stand alone"
+author: "Kate Saunders"
+date: "12/03/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In slides:
+
+* Fix hard coded mainland_df, tas_df and region_coords.rds
+
+In region summary shiny app:
+
+* Also have hard coded references that need fixing
+
+Reference to assets:
+
+* Also need to fix my reference to the assets folder
