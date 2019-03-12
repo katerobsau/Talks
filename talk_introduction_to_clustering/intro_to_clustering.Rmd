@@ -1,0 +1,593 @@
+---
+title: "Clustering"
+author: "Kate Saunders"
+date: "12/01/2019"
+output: ioslides_presentation
+---
+
+<style>
+.fullslide img {
+  margin-top: -85px;
+  margin-left: -60px;
+  width: 900px; 
+  height: 700px;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(shiny)
+library(magrittr)
+library(ggplot2)
+library(plotly)
+library(cluster)
+library(dendextend)
+```
+
+# 14.3 Cluster Analysis 
+
+## Unsupervised learning problem
+
+* Have some set of objects or points
+* Want to group or cluster these objects
+
+**Goal:**  
+Want objects clustered together to be more similar, than objects clustered differently
+
+**The catch:**  
+We do not know the true structure!  
+Key difference to supervised learning
+
+## Basic notation
+
+Some set of points, $x_i$, where $i = 1, \dots, N$   
+Each of these points have some attributes, $j$, where  $j = 1 \dots, p$  
+
+Example dataset: Iris
+```{r, echo = FALSE}
+require("datasets")
+data("iris") # load Iris Dataset
+str(iris) #view structure of dataset
+```
+
+## What does it mean to be similar?
+
+Define a dissimilarity between each attribute:
+$$d_j(x_{ij}, x_{i'j})$$
+Definte a dissimilarity between points:
+$$ D(x_i, x_{i'})= \sum_{j=1}^p d_j (x_{ij}, x_{i'j}) $$
+Common choice is squared Euclidean distance:
+$$D(x_i, x_{i'}) = \sum_{j=1}^p d_j(x_{ij},x_{i'j}) = \sum_{j=1}^p (x_{ij} - x_{i'j})^2$$
+
+## Attribute weights
+
+$$ D(x_i, x_{i'}) = \sum_{j=1}^p w_j \cdot d_j(x_{ij}, x_{i'j}); \quad \sum_{j=1}^p w_j = 1 $$
+
+* setting $w_j$ to $\tfrac{1}{p}$ does not necessarily mean all attributes provide equal contribution 
+
+* an alternative is to weight by the overall average contribution of each attribute, so let $w_j = \frac{1}{\bar{d_j}}$ where
+
+$$ \bar{d}_j = \frac{1}{N^2}\sum^N_{i=1}\sum^N_{i'=1}d_j(x_{ij}, x_{i'j}) $$
+
+* chosing weights/normalising should be decisions made with respect to the subject matter
+
+## Type of dissimilarities
+
+Different types of dissimilarities:  
+
+* Quantitative (eg. Euclidean)  
+* Ordinal (eg. Rank based - A,B,C,D,E)  
+* Categorical (eg. Sentiment - happy, sad, angry)  
+
+Dissimilarities are not necessarily distances   
+
+* don't need to satisfy triangle inequality 
+* the proximity matrix or distance matrix may not be symmetric
+
+## Clustering algorithms
+
+* *combinatorial* - work on the data with no reference to an underlying probability model
+
+* *mixture models* -  assume data is iid sampled from some population, each cluster corresponds to one component of the mixture density
+
+* *mode seekers* (bump hunters) - non-parametric approach, attempting to estimate modes of the distribution function
+
+## K-means 
+
+Some set of points, $x_i$, where $i = 1, \dots, N$   
+
+Prespecify a number of clusters $K < N$
+
+Index each cluster by $k \in \{1, \dots, K\}$
+
+Each observations can only belong to one cluster
+
+Define an encoder function, $k = C(i)$, so $x_i$ is assigned label $k$
+
+Assume there is some 'optimal' encoder $C^*(i)$ that captures the true underlying structure
+
+## How do we define optimal?
+
+"Total" point scatter = "Within" point scatter + "Between" point scatter
+
+$$ \begin{aligned}
+ T(C) &= \frac{1}{2} \sum_{i=1}^N\sum_{i'= 1}^N D(x_i, x_i') \\
+      &= \frac{1}{2}\sum_{k=1}^K\sum_{C(i) = k}\left( \sum_{C(i') =k} D(x_i, x_{i'})  + \sum_{C(i') \neq k} D(x_i, x_{i'}) \right) \\
+  &= W(C) + B(C)
+\end{aligned}$$
+
+* Minimise $W(C)$
+
+* Maximise $B(C)$ 
+ 
+* Can't evaluate this for all possible encoders - get greedy
+
+## K-means assumptions
+
+* Squared Euclidean distance
+
+* Minimise $W(C)$
+
+$$ \begin{aligned}
+W(C) &= \frac{1}{2}\sum_{k=1}^K\sum_{C(i) = k}\sum_{C(i')=k}  \|x_i - x_{i'}\|^2 \\
+&=\sum_{k=1}^K N_k \sum_{C(i) = k}\|x_i - \bar{x}_k \|^2, 
+\end{aligned}$$
+where $N_k$ are the number of points in the cluster with index $k$ and $\bar{x}_k$ is the mean vector.
+
+## Algorithm
+
+1. Generate a random assignments of points to clusters
+2. Find the mean of each cluster
+3. Update the assignment of points to clusters with respect to the new means
+4. Repeat this until steps 2 and 3 are unchanged.
+
+**Note:**
+
+Result will depend on our initial point assignment
+
+Algorithm will converge to a local minima, but not necessarily global mimina.
+
+## Iris example
+
+http://rpubs.com/Nitika/kmeans_Iris
+
+```{r, echo = TRUE}
+head(iris)
+iris.new<- iris[,c(1,2,3,4)]
+iris.class<- iris[,"Species"]
+```
+
+## Normalising
+
+```{r, echo = TRUE}
+summary(iris.new)
+normalize <- function(x){return ((x-min(x))/(max(x)-min(x)))}
+iris.new$Sepal.Length <- normalize(iris.new$Sepal.Length)
+iris.new$Sepal.Width <- normalize(iris.new$Sepal.Width)
+iris.new$Petal.Length <- normalize(iris.new$Petal.Length)
+iris.new$Petal.Width <- normalize(iris.new$Petal.Width)
+```
+
+## K-means in R
+
+```{r, echo = TRUE}
+result <- kmeans(x = iris.new, centers = 3, nstart = 10) 
+result$size
+result$centers 
+result$cluster
+```
+
+## K-means in R
+
+```{r}
+par(mfrow=c(2,2), mar=c(5,4,2,2))
+plot(iris.new[c(1,2)], col = result$cluster) 
+# Plot to see how Sepal.Length and Sepal.Width data points have been distributed in clusters
+plot(iris.new[c(1,2)], col = iris.class) 
+# Plot to see how Sepal.Length and Sepal.Width data points have been distributed originally as per "class" attribute in dataset
+plot(iris.new[c(3,4)], col = result$cluster) 
+# Plot to see how Petal.Length and Petal.Width data points have been distributed in clusters
+plot(iris.new[c(3,4)], col = iris.class)
+```
+
+## K-means in R
+Total number of correctly classified instances are:  
+36 + 47 + 50 = 133
+
+Total number of incorrectly classified instances are:   
+3 + 14 = 17
+
+Accuracy = 133/(133+17) = 0.88 i.e the model has achieved 88% accuracy
+
+```{r}
+table(result$cluster,iris.class)
+```
+
+## How do we choose $K$?
+
+Lots of methods - check out package, NbClust
+
+```{r,echo = FALSE}
+k_values = 2:10
+kmeans_result = lapply(k_values, kmeans, x = iris.new)
+wss = lapply(kmeans_result, function(l){ l$tot.withinss }) %>% as.numeric()
+ggplot(data = NULL) + 
+  geom_point(aes(x=k_values, y=wss)) +
+  xlab("K Value") + ylab("Total within-cluster sum of squares") + theme_bw()
+```
+
+## Iris example contd.
+
+```{r, echo = FALSE}
+result <- kmeans(x = iris.new, centers = 4)
+par(mfrow=c(2,2), mar=c(5,4,2,2))
+plot(iris.new[c(1,2)], col = result$cluster) # Plot to see how Sepal.Length and Sepal.Width data points have been distributed in clusters
+plot(iris.new[c(1,2)], col = iris.class) # Plot to see how Sepal.Length and Sepal.Width data points have been distributed originally as per "class" attribute in dataset
+plot(iris.new[c(3,4)], col = result$cluster) # Plot to see how Petal.Length and Petal.Width data points have been distributed in clusters
+plot(iris.new[c(3,4)], col = iris.class)
+```
+
+## Air Quality Example
+
+http://rpubs.com/Nitika/kmeans_Airquality 
+(What not to do!!!)
+
+```{r, echo = TRUE}
+data("airquality")
+str(airquality)
+```
+
+```{r echo = FALSE}
+
+# head(airquality)
+
+col1<- mapply(anyNA,airquality) # apply function anyNA() on all columns of airquality dataset
+
+# Impute monthly mean in Ozone
+for (i in 1:nrow(airquality)){
+  if(is.na(airquality[i,"Ozone"])){
+    airquality[i,"Ozone"]<- mean(airquality[which(airquality[,"Month"]==airquality[i,"Month"]),"Ozone"],na.rm = TRUE)
+  }
+  # Impute monthly mean in Solar.R
+  if(is.na(airquality[i,"Solar.R"])){
+    airquality[i,"Solar.R"]<- mean(airquality[which(airquality[,"Month"]==airquality[i,"Month"]),"Solar.R"],na.rm = TRUE)
+  }
+
+}
+
+```
+
+## Air quality contd.
+
+```{r, echo = TRUE}
+
+#Normalize the dataset 
+normalize<- function(x){
+  return((x-min(x))/(max(x)-min(x)))
+}
+
+# replace contents of dataset with normalized values
+airquality <- normalize(airquality)
+
+# apply k-means algorithmusing first 4 attributes and with k=3
+result<- kmeans(airquality[c(1,2,3,4)], 3) 
+```
+
+## Air quality contd.
+
+```{r, echo = FALSE}
+
+# result$size
+# result$centers
+# result$cluster
+
+# par(mfrow=c(1,2), mar=c(5,4,2,2))
+# plot(airquality[,1:2], col=result$cluster) # Plot to see how Ozone and Solar.R data points have been distributed in clusters
+# 
+# plot(airquality[,3:4], col=result$cluster) # Plot to see how Wind and Temp data points have been distributed in clusters
+
+plot(airquality[,], col=result$cluster)
+
+```
+
+## Limitations
+
+* K-means not robust to outliers
+
+* Method is commonly phrased using squared Euclidean distance
+
+* Optimisation requires a notion of a mean/centroid
+
+* Standard implementation is in terms of points not distances
+
+## K-medoids
+
+* Optimise with respect to one of the points, instead of the mean
+
+* More robust to outliers
+
+* Implementation is in terms of either distances or points
+
+## PAM Algorithm
+
+1. Randomly select an initial set of $K$ stations. These are the initial medoids, $m_k$. 
+
+2.  Assign each station, $x_i$, to its closest medoid, $m_k$
+
+3. For each cluster update the medoid. The new medoid is the station within that cluster such that minimises the sum of within cluster distances
+$$
+m_k = \mathop{\mathrm{argmin}}\limits_{x_i \in C_k} \sum_{C(i') =k} D(x_i, x_{i'}). 
+$$
+
+4. Repeat steps 2--4 until the medoids are unchanged.
+
+## Iris Example
+
+```{r, echo = TRUE}
+library(cluster)
+result_kmedoids_1 <- pam(x = iris.new, k = 3, diss = FALSE) 
+result_kmedoids_2 <- pam(x = dist(iris.new), k = 3, diss = TRUE)
+result_kmedoids_3 <- pam(x = iris.new, k = 3, 
+                       diss = FALSE, metric = "euclidean")
+
+```
+
+## Iris Example
+
+```{r, echo = FALSE}
+
+result_kmedoids <- pam(x = iris.new, k = 3, diss = FALSE) 
+
+par(mfrow=c(2,2), mar=c(5,4,2,2))
+plot(iris.new[c(1,2)], col = result_kmedoids$clustering) 
+points(iris.new[result_kmedoids$id.med, c(1,2)], pch = 3, cex = 2, lwd = 2) # Plot to see how Sepal.Length and Sepal.Width data points have been distributed in clusters
+plot(iris.new[c(1,2)], col = iris.class) # Plot to see how Sepal.Length and Sepal.Width data points have been distributed originally as per "class" attribute in dataset
+plot(iris.new[c(3,4)], col = result_kmedoids$clustering) 
+points(iris.new[result_kmedoids$id.med, c(3,4)], pch = 3, cex = 2, lwd = 2)# Plot to see how Petal.Length and Petal.Width data points have been distributed in clusters
+plot(iris.new[c(3,4)], col = iris.class)
+```
+
+## Again how to choose $K$?
+
+Let $m_k$ be the medoid of cluster with label $k$.   
+For a point $x_i$, $m_k$ is it's closest medoid.   
+Define $m_{k'}$ to be the next closest medoid.
+
+Silhouette coefficent:
+$$ 	s_i(k) = 1 - \dfrac{D(m_k,x_i)}{D(m_{k'}, x_i)} $$
+Average silhouette coefficient:
+$$ \bar{s}(K) = \dfrac{1}{N} \sum_{k = 1}^K \sum_{k = C(i)} s_i(k) $$
+
+## Average silhouette coefficient
+
+```{r}
+rep_kmedoids <- lapply(k_values, pam, x = iris.new, diss = FALSE) 
+aver_sil_info <- lapply(rep_kmedoids, function(l){l$silinfo$avg.width}) %>% as.numeric()
+ggplot(data = NULL, aes(x = k_values, y = aver_sil_info)) + geom_point() + xlab("K value") + ylab("Average Silhouette Coefficient") + theme_bw()
+```
+
+## Iris Example contd.
+
+```{r, echo = FALSE}
+
+result_kmedoids <- pam(x = iris.new, k = 2, diss = FALSE) 
+
+par(mfrow=c(2,2), mar=c(5,4,2,2))
+plot(iris.new[c(1,2)], col = result_kmedoids$clustering) 
+points(iris.new[result_kmedoids$id.med, c(1,2)], pch = 3, cex = 2, lwd = 2) # Plot to see how Sepal.Length and Sepal.Width data points have been distributed in clusters
+plot(iris.new[c(1,2)], col = iris.class) # Plot to see how Sepal.Length and Sepal.Width data points have been distributed originally as per "class" attribute in dataset
+plot(iris.new[c(3,4)], col = result_kmedoids$clustering) 
+points(iris.new[result_kmedoids$id.med, c(3,4)], pch = 3, cex = 2, lwd = 2)# Plot to see how Petal.Length and Petal.Width data points have been distributed in clusters
+plot(iris.new[c(3,4)], col = iris.class)
+```
+
+## Another example
+
+Consider the $\max\{D(x_i,x_j), 2\}$ as the clustering distance.
+```{r, echo = F, warning = F}
+set.seed(1)
+cap = 2
+theta = seq(0, 2*pi, length.out = 360)
+circle = data.frame(x = cap*cos(theta), y = cap*sin(theta))
+
+# CAP ON DISTANCE
+xshift = 7
+
+x0 = rnorm(500, 0, 1)
+y0 = rnorm(500, 0, 1)
+
+x1 = x0 + xshift
+y1 = y0
+
+x = c(x0,x1)
+y = c(y0,y1)
+
+DD = dist(cbind(x,y))
+i = which(DD > cap)
+DD[i] = cap
+
+pam_clusters = pam(DD, k = 2)
+
+k = 2
+cap_df = data.frame(x,y)
+cap_df$K = rep(k, nrow(cap_df))
+cap_df$cluster_id = pam_clusters$clustering
+cap_df$medoids_x = rep(NA, nrow(cap_df))
+cap_df$medoids_y = rep(NA, nrow(cap_df))
+cap_df$medoids_x[pam_clusters$medoids] = cap_df$x[pam_clusters$medoids]
+cap_df$medoids_y[pam_clusters$medoids] = cap_df$y[pam_clusters$medoids]
+
+kmedoids_eg1_plot <- ggplot() +
+  geom_point(data = cap_df, aes(x=x, y=y,
+                                col = as.factor(pam_clusters$clustering),
+                                shape = as.factor(pam_clusters$clustering),
+                                text = paste("Cluster ID:", as.factor(pam_clusters$clustering)))) +
+  scale_color_manual(values = c("purple", "orange")) +
+  geom_point(data = cap_df, aes(x = medoids_x,
+                                y = medoids_y),
+             col = "black", shape = 20, size = 2) +
+  geom_path(aes(x = circle$x, y = circle$y), linetype = "dashed") +
+  geom_path(aes(x = circle$x + xshift, y = circle$y), linetype = "dashed") +
+  coord_fixed() +
+  theme_bw() +
+  theme(legend.position = "none") +
+  ggtitle("Example of K-Medoids showing spurious clustering")
+
+ggplotly(kmedoids_eg1_plot, tooltip = c("text"))
+
+```
+
+## Density example
+
+```{r, echo = F, warning = F}
+
+xshift = 7
+x0 = rnorm(1000, 0, 1)
+y0 = rnorm(1000, 0, 1)
+
+i = sample(1:length(x0), 100)
+x1 = x0[i] + xshift
+y1 = y0[i]
+
+x = c(x0,x1)
+y = c(y0,y1)
+
+cap = 2
+DD = dist(cbind(x,y))
+i = which(DD > cap)
+DD[i] = cap
+
+pam_clusters_1 = pam(DD, k = 2)
+
+plot_df = data.frame(x,y)
+plot_df$K = paste("K = ", c(rep(2, length(x))))
+plot_df$cluster_id = c(pam_clusters_1$clustering)
+plot_df$medoids_x = rep(NA, nrow(plot_df))
+plot_df$medoids_y = rep(NA, nrow(plot_df))
+plot_df$medoids_x[pam_clusters_1$medoids] = plot_df$x[pam_clusters_1$medoids]
+plot_df$medoids_y[pam_clusters_1$medoids] = plot_df$y[pam_clusters_1$medoids]
+
+density_eg_plot <- ggplot(plot_df) +
+  geom_point(aes(x = x, y = y,
+                 col = as.factor(cluster_id),
+                 shape = as.factor(cluster_id),
+                 text = paste("Cluster ID:", as.factor(cluster_id)))) +
+  geom_point(aes(x = medoids_x,
+                 y = medoids_y),
+             col = "black", shape = 20, size = 2) +
+  coord_fixed() +
+  theme_bw() +
+  facet_wrap( ~ K, nrow = 2) +
+  theme(legend.position = "none") +
+  ggtitle("Station Density Example of K-Medoids")
+
+ggplotly(density_eg_plot, tooltip = c("text"))
+
+```
+
+## Limitations
+
+* still have to pick $K$
+
+* sensitive to point density
+
+* again, optimisation makes implicit assumptions about distance
+
+* greedy
+
+* slow for large numbers of points
+
+## Hierarchical clustering
+
+* Don't have to pick $K$
+
+* There is an implicit ordering or hierachy within the clustering
+
+## Dendrogram 
+
+```{r, echo = TRUE, eval = FALSE}
+hc <- hclust(dist(iris.new), method = "average")
+plot(hc, hang = -1, labels = FALSE, col = TRUE)
+clust1 = cutree(hc1, k = 3)
+```
+```{r, echo = FALSE}
+hc <- hclust(dist(iris.new), method = "average")
+plot(hc, hang = -1, labels = FALSE, col = TRUE)
+clusters_id = cutree(hc, k = 3)
+```
+
+## Linkages
+
+**Single:**
+$$D(C_k, C_{k'}) =  \min \{D(x_k, x_{k'}) : x_k \in C_k, x_{k'} \in C_{k'} \},$$
+also known as nearest neighbour and is the minimim pairwise distance. 
+
+**Complete (Furthest Neighbour):**
+$$
+	D(C_k, C_{k'}) = \max \{D(x_k, x_{k'}) : x_k \in C_k, x_{k'} \in C_{k'} \},
+$$
+also known as further neighbour and is the maximim pairwise distance.
+
+**Group Average:**
+$$
+	D(C_k, C_{k'}) = \frac{1}{|C_k|\,|C_{k'}|} \sum_{x_k \in C_k} \sum_{x_{k'} \in C_{k'}} D(x_k, x_{k'}),
+$$
+also known as the unweighted pair group method with arithmetic mean (UPGMA).
+
+## Algorithm
+
+To generate the agglomerative dendrogram:
+
+1. Merge the branches of the clusters with the smallest dissimilarity
+2. Update the dissimilarities relative to the new cluster.
+3. Repeat steps 1--3, until all points are combined in a single cluster.
+
+## More dendrograms
+
+```{r, echo = FALSE}
+hc1 <- hclust(dist(iris.new), method = "average") %>% as.dendrogram() 
+dend1 <- hc1 %>% color_branches(k = 3)
+hc2 <- hclust(dist(iris.new), method = "single") %>% as.dendrogram() 
+dend2 <- hc2 %>% color_branches(k = 3)
+hc3 <- hclust(dist(iris.new), method = "complete") %>% as.dendrogram() 
+dend3 <- hc3 %>% color_branches(k = 3)
+
+par(mfrow=c(1,3))
+# plot(hc1, hang = -1, labels = FALSE, col = TRUE)
+# abline(h = hc1$height[length(hc1$height) - 2], col = "red", lty = 2)
+# plot(hc2, hang = -1, labels = FALSE, col = TRUE)
+# abline(h = hc2$height[length(hc1$height) - 2], col = "red", lty = 2)
+# plot(hc3, hang = -1, labels = FALSE, col = TRUE)
+# abline(h = hc3$height[length(hc1$height) - 2], col = "red", lty = 2)
+
+ 
+plot(dend1)
+plot(dend2)
+plot(dend3)
+
+```
+
+## Clusters
+
+```{r}
+clust1 = cutree(hc1, k = 3)
+clust2 = cutree(hc2, k = 3)
+clust3 = cutree(hc3, k = 3)
+par(mfrow=c(2,3))
+plot(iris.new[c(1,2)], col = clust1, main = "Average") 
+plot(iris.new[c(1,2)], col = clust2, main = "Single") 
+plot(iris.new[c(1,2)], col = clust3, main = "Complete") 
+plot(iris.new[c(3,4)], col = clust1, main = "Average") 
+plot(iris.new[c(3,4)], col = clust2, main = "Single") 
+plot(iris.new[c(3,4)], col = clust3, main = "Complete") 
+```
+
+## Summary
+
+* Covered K-means, K-medoids and Hierarchical Clustering
+
+* Covered worked example in base R
+
+* Looked at strengths and limitations
+
+* Touched on cluster selection
