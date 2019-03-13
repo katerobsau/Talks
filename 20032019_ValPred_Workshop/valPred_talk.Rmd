@@ -20,20 +20,24 @@ library(cluster)
 library(ggplot2)
 library(plotly)
 library(dplyr)
+library(shiny)
 ```
 
 # Motivation
 
 ## Standard Approach
 
+To make statistical problems more tractable:
 <br>
 <br>
 <br>
- Common to pool data or consider problems on a region by region basis. 
+<br>
+ $\cdot$ Common to pool data eg. spatially
 <br>
 <br>
 <br>
-This can make statistical problems more tractable.
+<br>
+$\cdot$ Partition a region eg. consider region by region
 
 ## Climate example
 
@@ -68,7 +72,7 @@ Whan, Kirien, and Maurice Schmeits. "Comparing area probability forecasts of (ex
 ## Question 
 
 <br><br><br><br><br>
-<font color="2292B5">**How should assign regions for the analysis of extremes?** </font> 
+<font color="2292B5">**How should partition regions for the analysis of extremes?** </font> 
 
 ## Application
 
@@ -111,7 +115,7 @@ station_plot
 
 * Max-stable processes
 
-<font color="2292B5">**3. Spatial post-processing** </font>
+<!-- <font color="2292B5">**3. Spatial post-processing** </font> -->
 
 
 # Regionalisation
@@ -119,7 +123,7 @@ station_plot
 ## Clustering Distance
 
 <br><br>
-<font color="2292B5">**Require:**</font> Notion of closeness between two locations<br/ >
+<font color="2292B5">**Require:**</font> Measure of closeness between two locations<br/ >
 <br><br>
 <font color="2292B5">**Want:**</font> Form clusters based on extremal dependence<br/ >
 <br><br>
@@ -161,21 +165,27 @@ Cooley, D., Naveau, P. and Poncet, P., 2006. Variograms for spatial max-stable r
 ## Extremal Coefficient
 
 For <font color="2292B5">$M_{x_i}$</font> and
-<font color="2292B5">$M_{x_j}$</font> with common GEV marginals, <font color="2292B5">$\theta(x_i - x_j)$</font> is
+<font color="2292B5">$M_{x_j}$</font> with common GEV marginals is
 <font color="2292B5">$$\mathbb{P}\left( M_{x_i} \leq z, M_{x_j} \leq z \right) = \left[\mathbb{P}(M_{x_i}\leq z)\mathbb{P}(M_{x_i}\leq z)) \right]^{\tfrac{1}{2}\theta(x_i - x_j)}. %= \exp\left(\dfrac{-\theta(h)}{z}\right),$$</font>
+where <font color="2292B5">$\theta(x_i - x_j)$</font> is the extremal coefficient and the range of <font color="2292B5">$\theta(x_i - x_j)$ is $[1 , 2]$</font>.
 
-The range of <font color="2292B5">$\theta(x_i - x_j)$ is $[1 , 2]$</font>.
-
-Can write our distance measure as a function of the extremal coefficient, <font color="2292B5">$\theta(x_i - x_j)$,
-$$d(x_i, x_j) = \dfrac{\theta(x_i - x_j) - 1}{2(\theta(x_i - x_j) + 1)}.$$</font>
-
-Therefore the range of <font color="2292B5">$d(x_i, x_j)$</font> is <font color="2292B5">$[0 , 1/6]$</font>.
+Can express the F-madogram as:
+where <font color="2292B5">
+$$d(x_i, x_j) = \dfrac{\theta(x_i - x_j) - 1}{2(\theta(x_i - x_j) + 1)},$$</font>
+so the range of <font color="2292B5">$d(x_i, x_j)$</font> is <font color="2292B5">$[0 , 1/6]$</font>.
 
 <div class="notes">
 - Extremal coefficient is a measure for parital dependence
 - Using it for clustering, means our clsuters will have a natural interpretation
 - Importnat to note the range (talk about that again in a little bit)
 </div>
+
+## Clustering
+<br><br>
+$\checkmark$ Distance
+
+<br><br><br>
+$?$ Algorithm
 
 ## K-Medoids Clustering and PAM
 
@@ -439,21 +449,17 @@ ggplotly(cluster_plot1)
 * Need to be able to identify regional boundaries
 </div>
 
+<!-- ## Results -->
 
-## Results
-
-```{r regions, echo = FALSE}
-shinyAppDir("shiny_apps/region_summary/",
- options = list(width = "100%", height = 700)
-)
-```
+<!-- ```{r regions, echo = FALSE} -->
+<!-- shinyAppDir("shiny_apps/region_summary/", options = list(width = "100%", height = 700)) -->
+<!-- ``` -->
 
 ## Choosing a cut height
 
-IMAGE
-<!-- <center> -->
-<!-- <img src= "kate_img/missing_fmado.png" width = 100%> -->
-<!-- </center> -->
+<center>
+<img src= "img/missing_fmado.png" width = 100%>
+</center>
 
 <div class="notes">
 Depends on what you are trying to do?
@@ -471,34 +477,112 @@ Depends on the topography as well
 
 ## Similar Dependence
 
+<br>
+<br>
+<br>
 <font color="2292B5"> **Where can we assume a common dependence structure for extremes?** </font >
 
-# Max-stable processes
+# Visualising Dependence
 
-## Max-stable process
+## Max-stable Processes
 
-Shiny App
+* Extremes in continuous space with dependence <br/>
+<br/>
+* Natural extension from univariate extreme value theory  <br/>
+<br/>
+* Univariate marginal distributions are GEV distributions <br/>
+<br/>
+* Can simulate from these processes
 
-## Level curves
+<!-- ## Smith Process -->
+
+<!-- ```{r, echo = FALSE} -->
+<!-- shinyAppDir("shiny_apps/Maxstable_sim/", -->
+<!--  options = list(width = "100%", height = 700) -->
+<!-- ) -->
+<!-- ``` -->
+
+## Max-stable processes and post-processing
+
+<font size="3"> 
+Oesting, M., Schlather, M. and Friederichs, P., 2017. Statistical post-processing of forecasts for extremes using bivariate Brown-Resnick processes with an application to wind gusts. Extremes, 20(2), pp.309-332.
+</font>
+
+* Fit two max-stable fields: observations and numerical model output
+<br>
+
+* Model the dependence between these two fields
+<br>
+
+* Conditionally simulate observations based on the numerical model output
+<br>
+
+* Use these simulations to generate probabilistic forecast of a spatial field
 
 ## Visualising Dependence
 
-SWWA 
+* Visualise the partition using elliptical level curves
 
-TAS
+<font color="2292B5">
+$$ \mathbb{P}(\| \mathbf{x} - \mathbf{c_k} \| < r) = 1 - \exp \left( \frac{-r^2}{2} \right)$$
+</font>
  
+* Centre the curve on the centroid <font color="2292B5">$c_k$</font>
+* Repeat fitting by sampling stations to understand uncertainty
+* Size and direction of ellipses have a natural intepretation in terms dependence
+
+## Southwest Western Australia
+
+<center>
+<!-- <img src= "kate_img/smith_SWWA_low.jpg" width = 49%> -->
+<img src= "img/smith_SWWA_high.jpg" width = 49%>
+</center>
+
+## Tasmania
+
+<center>
+<img src= "img/smith_TAS_low.jpg" width = 49%>
+<img src= "img/smith_TAS_high.jpg" width = 49%>
+</center>
+
 ## Relevance to post-processing
- 
-Oesting et. al 2017
 
-* approach
+<font color="2292B5">**Perfect Prog Approach:**</font>  
+Simulate the ensemble from the statistical model  
+<br>
 
-* cut the region into two
+<font color="2292B5">**Assumptions:**</font>   
+The fitted statistical model is the truth  
+<br>
+
+<font color="2292B5">**Relevance:**</font>   
+Need to ensure how we model the dependence is accurate
+
+## Conclusions
+
+* Crate hierarchical clustering
+* Identified regions of similar extremal dependence
+* Shown different regions have different extremal dependence
+* Regionalisation helps us understand were we can reasonably assume
+a single dependence structure
+
+Future work: Non-stationary dependence!
+
+**e.** K.R.Saunders@tudelft.nl
+
+**t.** @katerobsau
+
+**g.** github.com/katerobsau
  
 # Conclusions
 
 ## Conclusions
 
+## {.fullslide}
+
+<center>
+<img src="kate_img/Storm_Vas.jpg">
+</center>
 
 
 
