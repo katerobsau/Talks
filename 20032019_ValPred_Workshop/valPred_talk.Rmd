@@ -362,30 +362,39 @@ ggplotly(density_eg_plot, tooltip = c("text"))
 
 ## Gridded data
 
-Spatial density is changed by land-sea and domain boundaries  
+* Ensure there are sufficient medoids
 
-<br><br>
+<br>
 
-Tendancy toward clusters of equal size 
+* Spatial density is changed by land-sea and domain boundaries  
 
-<br><br>
+<br>
 
-Clustering is in F-madogram space not Euclidean  
+* Tendancy toward clusters of equal size 
 
-## Hierarchical Clustering
+<br>
 
-1. Each station starts in its own cluster
-2. For each pair of clusters, <font color="2292B5">$C_k$</font> and <font color="2292B5">$C_k'$</font>, define the distance between the clusters as
-<font color="2292B5">$$d(C_k, C_{k'}) = \frac{1}{|C_k| |C_{k'}|} \sum_{x_k \in C_k} \sum_{x_{k'} \in C_{k'}} d(x_k, x_{k'}).$$</font>
-3. Merge the the clusters with the smallest distance
-4. Update the distances relative to the new cluster
-5. Repaet steps 3 - 5, until all points are combined in a single cluster
+* Clustering is in F-madogram space not Euclidean  
 
 ## Hierarchical Clustering
 
 <center>
-<img src= "img/TAS_linkage_average.png" width = 65%>
+<img src= "img/TAS_linkage_average.png" width = 50%>
 </center>
+
+<font color="2292B5">**Linkage Rule:**</font>
+For each pair of clusters, <font color="2292B5">$C_k$</font> and <font color="2292B5">$C_k'$</font>
+<!-- , define the distance between the clusters as -->
+<font color="2292B5">$$d(C_k, C_{k'}) = \frac{1}{|C_k| |C_{k'}|} \sum_{x_k \in C_k} \sum_{x_{k'} \in C_{k'}} d(x_k, x_{k'}).$$</font>
+
+<!-- ## Hierarchical Clustering -->
+
+<!-- 1. Each station starts in its own cluster -->
+<!-- 2. For each pair of clusters, <font color="2292B5">$C_k$</font> and <font color="2292B5">$C_k'$</font>, define the distance between the clusters as -->
+<!-- <font color="2292B5">$$d(C_k, C_{k'}) = \frac{1}{|C_k| |C_{k'}|} \sum_{x_k \in C_k} \sum_{x_{k'} \in C_{k'}} d(x_k, x_{k'}).$$</font> -->
+<!-- 3. Merge the the clusters with the smallest distance -->
+<!-- 4. Update the distances relative to the new cluster -->
+<!-- 5. Repaet steps 3 - 5, until all points are combined in a single cluster -->
 
 ## Back to the first example
 
@@ -449,7 +458,7 @@ ggplotly(cluster_plot1)
 * Need to be able to identify regional boundaries
 </div>
 
-<!-- ## Results -->
+## Results
 
 <!-- ```{r regions, echo = FALSE} -->
 <!-- shinyAppDir("shiny_apps/region_summary/", options = list(width = "100%", height = 700)) -->
@@ -494,30 +503,30 @@ Depends on the topography as well
 <br/>
 * Can simulate from these processes
 
-<!-- ## Smith Process -->
+<!-- ## Max-stable processes and post-processing -->
+
+<!-- <font size="3">  -->
+<!-- Oesting, M., Schlather, M. and Friederichs, P., 2017. Statistical post-processing of forecasts for extremes using bivariate Brown-Resnick processes with an application to wind gusts. Extremes, 20(2), pp.309-332. -->
+<!-- </font> -->
+
+<!-- * Fit two max-stable fields: observations and numerical model output -->
+<!-- <br> -->
+
+<!-- * Model the dependence between these two fields -->
+<!-- <br> -->
+
+<!-- * Conditionally simulate observations based the max-stable field for the numerical model output -->
+<!-- <br> -->
+
+<!-- * Use these simulations to generate an ensemble and a probabilistic forecast of a spatial field -->
+
+## Smith Process
 
 <!-- ```{r, echo = FALSE} -->
 <!-- shinyAppDir("shiny_apps/Maxstable_sim/", -->
 <!--  options = list(width = "100%", height = 700) -->
 <!-- ) -->
 <!-- ``` -->
-
-## Max-stable processes and post-processing
-
-<font size="3"> 
-Oesting, M., Schlather, M. and Friederichs, P., 2017. Statistical post-processing of forecasts for extremes using bivariate Brown-Resnick processes with an application to wind gusts. Extremes, 20(2), pp.309-332.
-</font>
-
-* Fit two max-stable fields: observations and numerical model output
-<br>
-
-* Model the dependence between these two fields
-<br>
-
-* Conditionally simulate observations based on the numerical model output
-<br>
-
-* Use these simulations to generate probabilistic forecast of a spatial field
 
 ## Visualising Dependence
 
@@ -527,7 +536,7 @@ Oesting, M., Schlather, M. and Friederichs, P., 2017. Statistical post-processin
 $$ \mathbb{P}(\| \mathbf{x} - \mathbf{c_k} \| < r) = 1 - \exp \left( \frac{-r^2}{2} \right)$$
 </font>
  
-* Centre the curve on the centroid <font color="2292B5">$c_k$</font>
+* Centre the curve on the centroid of cluster $k$ <font color="2292B5">$\mathbf{c_k}$</font>
 * Repeat fitting by sampling stations to understand uncertainty
 * Size and direction of ellipses have a natural intepretation in terms dependence
 
@@ -547,8 +556,12 @@ $$ \mathbb{P}(\| \mathbf{x} - \mathbf{c_k} \| < r) = 1 - \exp \left( \frac{-r^2}
 
 ## Relevance to post-processing
 
+<font size="3">
+Oesting, M., Schlather, M. and Friederichs, P., 2017. Statistical post-processing of forecasts for extremes using bivariate Brown-Resnick processes with an application to wind gusts. Extremes, 20(2), pp.309-332.
+</font>
+
 <font color="2292B5">**Perfect Prog Approach:**</font>  
-Simulate the ensemble from the statistical model  
+Simulate an ensemble from the fitted max-stable process
 <br>
 
 <font color="2292B5">**Assumptions:**</font>   
@@ -560,28 +573,33 @@ Need to ensure how we model the dependence is accurate
 
 ## Conclusions
 
-* Crate hierarchical clustering
-* Identified regions of similar extremal dependence
-* Shown different regions have different extremal dependence
-* Regionalisation helps us understand were we can reasonably assume
+* Create a regionalisation of Australia based on extremal dependence
+
+* Highlighted some considerations for clustering applications
+
+* Used the regionalisation to fit max-stable models
+
+* Visualised extremal dependence
+
+* Helped us understand were we can reasonably assume
 a single dependence structure
 
-Future work: Non-stationary dependence!
+## Future work
+
+* Non-stationary dependence!
+
+* Post-processing of compound events: Storm surge and Precipitation
 
 **e.** K.R.Saunders@tudelft.nl
 
 **t.** @katerobsau
 
 **g.** github.com/katerobsau
- 
-# Conclusions
-
-## Conclusions
 
 ## {.fullslide}
 
 <center>
-<img src="kate_img/Storm_Vas.jpg">
+<img src="img/Storm_Vas.jpg">
 </center>
 
 
