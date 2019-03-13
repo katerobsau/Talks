@@ -29,7 +29,7 @@ library(dplyr)
 <br>
 <br>
 <br>
- In meteorology or climate, it is common to pool data or consider problems on a region by region basis. 
+ Common to pool data or consider problems on a region by region basis. 
 <br>
 <br>
 <br>
@@ -51,12 +51,19 @@ National Resource Management Regions
 <img src= "img/NRM_sub_clusters.pdf" width = 49%>
 <img src= "img/NRM_super_clusters.pdf" width = 49%>
 
+<font size="3">
+CSIRO and Bureau of Meteorology, 2015. Climate change in Australia information for Australia's natural resource management regions: Technical report.
+</font>
+
 ## Post-processing example
 
-<!-- Whan, Kirien, and Maurice Schmeits. "Comparing area probability forecasts of (extreme) local precipitation using parametric and machine learning statistical postprocessing methods." Monthly Weather Review 146.11 (2018): 3651-3673. -->
-
 <center>
-<img src= "img/aerial_post_processing.png" width = 50%>
+<img src= "img/aerial_post_processing.png" width = 40%>
+</center>
+<br>
+<font size="3">
+Whan, Kirien, and Maurice Schmeits. "Comparing area probability forecasts of (extreme) local precipitation using parametric and machine learning statistical postprocessing methods." Monthly Weather Review 146.11 (2018): 3651-3673.</font>
+
 
 ## Question 
 
@@ -64,8 +71,6 @@ National Resource Management Regions
 <font color="2292B5">**How should assign regions for the analysis of extremes?** </font> 
 
 ## Application
-
-<font color="2292B5">**Assign regions that are likely to experience similar impacts** </font>
 
 ```{r, echo = FALSE}
 wdir = paste(getwd(), "data", sep = "/")
@@ -84,13 +89,14 @@ station_plot <- ggplot(data = coords) +
   theme_bw()
 station_plot
 ```
+<font color="2292B5">**Create regions that are likely to experience similar impacts** </font>
 
 ## Regionalisation
 
-<font color="2292B5">**Use these regions to inform our statistical analysis** </font>
-
 <center>
-<img src= "img/aus_regionalisation.png" width = 80%>
+<img src= "img/aus_regionalisation.png" width = 70%>
+
+<font color="2292B5">**These regions can then inform our statistical analysis** </font>
 
 ## Outline 
 
@@ -108,26 +114,41 @@ station_plot
 <font color="2292B5">**3. Spatial post-processing** </font>
 
 
-# Clustering
+# Regionalisation
 
 ## Clustering Distance
 
-<font color="2292B5">**Form clusters based on extremal dependence!**</font><br/ >
-(Bernard et al 2013)
+<br><br>
+<font color="2292B5">**Require:**</font> Notion of closeness between two locations<br/ >
+<br><br>
+<font color="2292B5">**Want:**</font> Form clusters based on extremal dependence<br/ >
+<br><br>
+<font color="2292B5">**Solution:**</font> The F-madogram distance</br>
 
-* Use only the raw annual maxima
-* No information about climate or topography
+<br><br><br><br>
+<font size="3">
+Bernard, Elsa, et al. "Clustering of maxima: Spatial dependencies among heavy rainfall in France." Journal of Climate 26.20 (2013): 7929-7937.
+</font>
 
-## Clustering Distance
+## F-madogram distance
 
-<font color="2292B5">**Use the F-madogram distance**</font></br> (Cooley et al 2006)
 <font color="2292B5">$$d(x_i, x_j) = \tfrac{1}{2} \mathbb{E} \left[ \left| F_i(M_{x_i}) - F_j(M_{x_j})) \right| \right]$$</font>
 where
 <font color="2292B5">$M_{x_i}$</font> is the annual maximum rainfall at location
 <font color="2292B5">$x_i \in \mathbb{R}^2$</font> and <font color="2292B5">$F_i$</font> is the distribution function of
 <font color="2292B5">$M_{x_i}$</font>.
 
-This distance can be estimated non-parametrically.
+<br>
+<font color="2292B5"> **Advantages:** </font>
+
+* Only use the raw block (annual) maxima
+* No information about climate or topography
+* Non-parametric estimation (fast)
+
+<br>
+<font size="3">
+Cooley, D., Naveau, P. and Poncet, P., 2006. Variograms for spatial max-stable random fields. In Dependence in probability and statistics (pp. 373-390). Springer, New York, NY.
+</font>
 
 <div class="notes">
 - In spatial statistics normally we have a notion of how close two things are using the variogram
@@ -156,30 +177,77 @@ Therefore the range of <font color="2292B5">$d(x_i, x_j)$</font> is <font color=
 - Importnat to note the range (talk about that again in a little bit)
 </div>
 
-## K-Medoids Clustering
+## K-Medoids Clustering and PAM
 
-Partitioning around Medoids (PAM):
-(Kaufman and Rousseeuw 1990)
-
-1. Randomly select an initial set of $K$ stations. These are the set of the initial medoids.
-2. Assign each station, $x_i$, to its closest medoid, $m_k$, based on the F-madogram distance.
-3. For each cluster, $C_k$, update the medoid according to
-$$m_k = \mathop{\mathrm{argmin}}\limits_{x_i \in C_k} \sum_{x_j \in C_k} d(x_i, x_j).$$
+1. Randomly select an initial set of <font color="2292B5">$K$</font> stations. These are the set of the initial medoids.
+2. Assign each station, <font color="2292B5">$x_i$</font>, to its closest medoid, <font color="2292B5">$m_k$</font>, based on the F-madogram distance.
+3. For each cluster, <font color="2292B5">$C_k$</font>, update the medoid according to
+<font color="2292B5">
+$$m_k = \mathop{\mathrm{argmin}}\limits_{x_i \in C_k} \sum_{x_j \in C_k} d(x_i, x_j).$$</font>
 4. Repeat steps 2. -- 4. until the medoids are no longer updated.
+
+<br>
+<font size="3">Kaufman, L. and Rousseeuw, P.J., 1990. Partitioning around medoids (PAM). Finding groups in data: an introduction to cluster analysis, pp.68-125.</font>
 
 ## Result
 
-SWWA 
-EA
+```{r, echo = FALSE, warning = FALSE}
 
-## Assumptions
+plot_coords = readRDS(paste(wdir, "plot_coords.rds", sep =  "/"))
+text.type.large <- element_text(size = 12)
+text.type.small <- element_text(size = 11)
 
-Truth
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
 
+plot_coords <- plot_coords %>%
+  mutate(temp = if_else(distance_type == plot_coords$distance_type[1],  
+                   T, F)) %>%
+  mutate(cluster_id = cluster_id + temp*10) %>%
+  mutate(cluster_id = if_else(cluster_id == 12, 1, cluster_id)) %>%
+  mutate(cluster_id = if_else(cluster_id == 11, 3, cluster_id)) %>%
+  mutate(cluster_id = if_else(cluster_id == 15, 2, cluster_id)) %>%
+  mutate(cluster_id = if_else(cluster_id == 17, 4, cluster_id)) %>%
+  mutate(cluster_id = if_else(cluster_id == 13, 7, cluster_id)) %>%
+  mutate(cluster_id = if_else(cluster_id == 16, 8, cluster_id)) %>%
+  mutate(cluster_id = if_else(cluster_id == 14, 6, cluster_id)) 
+
+plot_title = "K-medoids clustering"
+
+cluster_plot <- ggplot() +
+  geom_point(data = plot_coords %>% 
+               filter(distance_type == plot_coords$distance_type[1]),
+             aes(x = longitude, y = latitude,
+                 col = as.factor(cluster_id),
+                 shape = as.factor(cluster_id%%6)), size = 0.8) + #,
+                 # group = distance_type)) +
+  coord_fixed() +
+  # facet_wrap(~distance_type, ncol = 2) +
+  geom_path(data = mainland_df, aes(x = Long, y = Lat)) +
+  geom_path(data = tas_df, aes(x = Long, y = Lat)) +
+  scale_x_continuous(limits = range(plot_coords$longitude) + c(-0.1, 0.1)) +
+  scale_y_continuous(limits = range(plot_coords$latitude) + c(-0.1, 0.1)) +
+  scale_color_manual(values = gg_color_hue(10)[c(1,2,3,4,5,6,7, rep(8,2))]) + 
+  # red, orange, #brown, # green, #lightgreen, #light blue, #blue
+  theme_bw() +
+  xlab("Longitude") +
+  ylab("Latitude") +
+  ggtitle(plot_title) +
+  theme(legend.position = "none",
+        legend.text = text.type.small,
+        strip.text.x = text.type.large,
+        axis.text = text.type.small,
+        plot.title = text.type.large,
+        axis.title = text.type.large)
+
+ggplotly(cluster_plot)
+```
 
 ## Example
 
-Consider the <font color="2292B5">$\| x_i - x_j \|$</font> as the clustering distance.
+Consider the <font color="2292B5"> $\max \{ \| x_i - x_j \|, 2\}$</font> as the clustering distance.
 ```{r, echo = F, warning = F}
 set.seed(1)
 cap = 2
@@ -225,6 +293,7 @@ kmedoids_eg1_plot <- ggplot() +
   geom_path(aes(x = circle$x, y = circle$y), linetype = "dashed") +
   geom_path(aes(x = circle$x + xshift, y = circle$y), linetype = "dashed") +
   coord_fixed() +
+  xlab("") + ylab("") +
   theme_bw() +
   theme(legend.position = "none") +
   ggtitle("Example of K-Medoids showing spurious clustering")
@@ -281,9 +350,17 @@ ggplotly(density_eg_plot, tooltip = c("text"))
 
 ```
 
-## Back to our example
-
 ## Gridded data
+
+Spatial density is changed by land-sea and domain boundaries  
+
+<br><br>
+
+Tendancy toward clusters of equal size 
+
+<br><br>
+
+Clustering is in F-madogram space not Euclidean  
 
 ## Hierarchical Clustering
 
@@ -296,37 +373,80 @@ ggplotly(density_eg_plot, tooltip = c("text"))
 
 ## Hierarchical Clustering
 
-<font color="2292B5">$$d(C_k, C_{k'}) = \frac{1}{|C_k| |C_{k'}|} \sum_{x_k \in C_k} \sum_{x_{k'} \in C_{k'}} d(x_k, x_{k'}).$$</font>
+<center>
+<img src= "img/TAS_linkage_average.png" width = 65%>
+</center>
 
-PICTURE
-<!-- <center> -->
-<!-- <img src= "kate_img/TAS_linkage_average.png" width = 65%> -->
-<!-- </center> -->
+## Back to the first example
 
+```{r, echo = FALSE, warning = FALSE}
+
+plot_title = "Comparison"
+
+plot_coords = readRDS(paste(wdir, "plot_coords.rds", sep =  "/"))
+
+plot_coords <- plot_coords %>%
+  mutate(temp = if_else(distance_type == plot_coords$distance_type[1],  
+                   T, F)) %>%
+  mutate(cluster_id = cluster_id + temp*10) %>%
+  mutate(cluster_id = if_else(cluster_id == 12, 1, cluster_id)) %>%
+  mutate(cluster_id = if_else(cluster_id == 11, 3, cluster_id)) %>%
+  mutate(cluster_id = if_else(cluster_id == 15, 2, cluster_id)) %>%
+  mutate(cluster_id = if_else(cluster_id == 17, 4, cluster_id)) %>%
+  mutate(cluster_id = if_else(cluster_id == 13, 7, cluster_id)) %>%
+  mutate(cluster_id = if_else(cluster_id == 16, 8, cluster_id)) %>%
+  mutate(cluster_id = if_else(cluster_id == 14, 6, cluster_id)) 
+  
+
+cluster_plot1 <- ggplot() +
+  geom_point(data = plot_coords,
+             aes(x = longitude, y = latitude,
+                 col = as.factor(cluster_id),
+                 shape = as.factor(cluster_id%%6),
+                 group = distance_type), size = 0.8) +
+  coord_fixed() +
+  facet_wrap(~distance_type, ncol = 2) +
+  geom_path(data = mainland_df, aes(x = Long, y = Lat)) +
+  geom_path(data = tas_df, aes(x = Long, y = Lat)) +
+  scale_x_continuous(limits = range(plot_coords$longitude) + c(-0.1, 0.1)) +
+  scale_y_continuous(limits = range(plot_coords$latitude) + c(-0.1, 0.1)) +
+  scale_color_manual(values = gg_color_hue(10)[c(1,2,3,4,5,6,7, 8,9,10)]) + 
+  theme_bw() +
+  xlab("Longitude") +
+  ylab("Latitude") +
+  ggtitle(plot_title) +
+  theme(legend.position = "none",
+        legend.text = text.type.small,
+        strip.text.x = text.type.large,
+        axis.text = text.type.small,
+        plot.title = text.type.large,
+        axis.title = text.type.large)
+
+ggplotly(cluster_plot1)
+```
 
 ## Classify
 
 * Classify a station relative to its closest neighbours
 * Use a weighted classification $w$-kNN
 
-IMAGE
-<!-- <center> -->
-<!-- <img src= "kate_img/classification.png" width = 65%> -->
+<center>
+<img src= "img/classification.png" width = 65%>
 
 <div class="notes">
+* clustering is so good not really much need
 * Need to be able to classify locations without a station
 * Need to be able to identify regional boundaries
 </div>
 
+
 ## Results
 
-SHINY APP
-
-<!-- ```{r regions, echo = FALSE} -->
-<!-- shinyAppDir("shiny_apps/region_summary/", -->
-<!--  options = list(width = "100%", height = 700) -->
-<!-- ) -->
-<!-- ``` -->
+```{r regions, echo = FALSE}
+shinyAppDir("shiny_apps/region_summary/",
+ options = list(width = "100%", height = 700)
+)
+```
 
 ## Choosing a cut height
 
