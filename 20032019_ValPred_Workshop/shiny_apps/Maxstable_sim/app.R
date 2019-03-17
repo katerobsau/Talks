@@ -5,6 +5,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(shiny)
+library(latex2exp)
 
 set.seed(20)
 n = 10

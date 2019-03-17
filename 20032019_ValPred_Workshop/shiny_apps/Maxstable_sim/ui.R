@@ -13,6 +13,6 @@
     #   plotOutput("simPlot", width = "200px"))),
     
     sliderInput("simVal", "Index i",
-                min = 1, max = 10, value = 1)
+                min = 1, max = 20, value = 1)
   )
 

@@ -1,13 +1,26 @@
 ## Packages
-# library(ggplot2)
-# library(dplyr)
+library(ggplot2)
+library(dplyr)
 
 ## Data needed
 region_names = c("TAS", "EA", "SEA", "SWWA", "NA", "R")
 text.type.large <- element_text(size = 12)
 text.type.small <- element_text(size = 11)
 
-shiny_wdir = "shiny_apps/region_summary/shiny_data/"
+# app_name = "region_summary"
+# ioslide_folder = "20032019_ValPred_Workshop⁩"
+# wd = getwd()
+# print(wd)
+# str_split = strsplit(wd, split = "/")
+# current_folder = str_split[[1]][length(str_split[[1]])]
+# if(current_folder == app_name){
+  # shiny_wdir = "shiny_data/"
+# }else if(current_folder == ioslide_folder){
+  # shiny_wdir = "shiny_apps/region_summary/shiny_data/"
+# }else{
+  # stop()
+# }
+shiny_wdir = "/Users/katesaunders/Documents/Git/Talks/20032019_ValPred_Workshop/shiny_apps/region_summary/shiny_data"
 mainland_df = readRDS(paste(shiny_wdir, "mainland_df.rds", sep =  "/"))
 tas_df = readRDS(paste(shiny_wdir, "tas_df.rds", sep =  "/"))
 
@@ -17,8 +30,8 @@ server <- function(input, output){
   output$recordPlot <- renderPlot({
     
     region_name = input$region
-    grid_classify = readRDS(file = paste(shiny_wdir, "classify_", region_name, ".rds", sep = ""))
-    hclusters = readRDS(file = paste(shiny_wdir, "cluster_", region_name, ".rds", sep = ""))
+    grid_classify = readRDS(file = paste(shiny_wdir, "/classify_", region_name, ".rds", sep = ""))
+    hclusters = readRDS(file = paste(shiny_wdir, "/cluster_", region_name, ".rds", sep = ""))
     
     h_values = hclusters %>% select(h) %>% 
       filter(h > 0.10 & h < 0.16) %>%

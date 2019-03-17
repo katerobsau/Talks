@@ -1,21 +1,26 @@
 ---
-title: "ValPred_Talk"
+title: "A Regionalisation Approach for Extremes"
 author: "Kate Saunders"
 date: "12/03/2019"
-output: ioslides_presentation
+output: 
+  ioslides_presentation:
+    css: assets/delft_style.css
+    runtime: shiny
+    # widescreen: yes
 ---
-
+  
 <style>
-.fullslide img {
-  margin-top: -85px;
-  margin-left: -60px;
-  width: 900px; 
-  height: 700px;
-}
+  .fullslide img {
+    margin-top: -85px;
+    margin-left: -60px;
+    width: 900px; 
+    height: 700px;
+  }
 </style>
-
-```{r setup, include=FALSE}
+  
+```{r, echo = FALSE, warning = FALSE, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+addResourcePath("assets", "assets/")   # Must include this line !
 library(cluster)
 library(ggplot2)
 library(plotly)
@@ -28,33 +33,25 @@ library(shiny)
 ## Standard Approach
 
 To make statistical problems more tractable:
+  <br>
+  <br>
+  <br>
+  <br>
+  $\cdot$ Common to pool data eg. spatially
 <br>
-<br>
-<br>
-<br>
- $\cdot$ Common to pool data eg. spatially
-<br>
-<br>
-<br>
-<br>
-$\cdot$ Partition a region eg. consider region by region
+  <br>
+  <br>
+  <br>
+  $\cdot$ Partition a region eg. consider region by region
 
 ## Climate example
 
 National Resource Management Regions
-<!-- % NRM clusters -->
-<!-- @book{bureau2015climate, -->
-<!--   title={Climate change in Australia}, -->
-<!--   author={CSIRO{\ } and {\ } Bureau{\ }of{\ }Meteorology}, -->
-<!--   publisher={CSIRO and Bureau of Meteorology, Australia}, -->
-<!--   year={2015} -->
-<!-- } -->
-<!--   title={Climate change in Australia. Information for Australia’s natural resource management regions: Technical Report}, -->
 
 <center>
-<img src= "img/NRM_sub_clusters.pdf" width = 49%>
-<img src= "img/NRM_super_clusters.pdf" width = 49%>
-
+<img src= "talk_img/NRM_sub_clusters.png" width = 49%>
+<img src= "talk_img/NRM_super_clusters.png" width = 49%>
+  
 <font size="3">
 CSIRO and Bureau of Meteorology, 2015. Climate change in Australia information for Australia's natural resource management regions: Technical report.
 </font>
@@ -62,7 +59,7 @@ CSIRO and Bureau of Meteorology, 2015. Climate change in Australia information f
 ## Post-processing example
 
 <center>
-<img src= "img/aerial_post_processing.png" width = 40%>
+<img src= "talk_img/aerial_post_processing.png" width = 40%>
 </center>
 <br>
 <font size="3">
@@ -81,16 +78,16 @@ wdir = paste(getwd(), "data", sep = "/")
 mainland_df = readRDS(paste(wdir, "mainland_df.rds", sep =  "/"))
 tas_df = readRDS(paste(wdir, "tas_df.rds", sep =  "/"))
 coords = readRDS(paste(wdir, "region_coords.rds", sep = "/")) %>%
-  dplyr::bind_rows()
+dplyr::bind_rows()
 station_plot <- ggplot(data = coords) +
-  geom_point(aes(x = longitude, y = latitude), size = 0.2, alpha = 0.5) +
-  geom_path(data = mainland_df, aes(x = Long, y =Lat)) +
-  geom_path(data = tas_df, aes(x = Long, y =Lat)) +
-  xlab("Longitude") +
-  ylab("Latitude") +
-  ggtitle("Station Locations") +
-  coord_fixed() +
-  theme_bw()
+geom_point(aes(x = longitude, y = latitude), size = 0.2, alpha = 0.5) +
+geom_path(data = mainland_df, aes(x = Long, y =Lat)) +
+geom_path(data = tas_df, aes(x = Long, y =Lat)) +
+xlab("Longitude") +
+ylab("Latitude") +
+ggtitle("Station Locations") +
+coord_fixed() +
+theme_bw()
 station_plot
 ```
 <font color="2292B5">**Create regions that are likely to experience similar impacts** </font>
@@ -98,7 +95,7 @@ station_plot
 ## Regionalisation
 
 <center>
-<img src= "img/aus_regionalisation.png" width = 70%>
+<img src= "talk_img/aus_regionalisation.png" width = 70%>
 
 <font color="2292B5">**These regions can then inform our statistical analysis** </font>
 
@@ -136,7 +133,7 @@ Bernard, Elsa, et al. "Clustering of maxima: Spatial dependencies among heavy ra
 
 ## F-madogram distance
 
-<font color="2292B5">$$d(x_i, x_j) = \tfrac{1}{2} \mathbb{E} \left[ \left| F_i(M_{x_i}) - F_j(M_{x_j})) \right| \right]$$</font>
+<font color="2292B5">$$d(x_i, x_j) = \tfrac{1}{2} \mathbb{E} \left[ \left| F_i(M_{x_i}) - F_j(M_{x_j}) \right| \right]$$</font>
 where
 <font color="2292B5">$M_{x_i}$</font> is the annual maximum rainfall at location
 <font color="2292B5">$x_i \in \mathbb{R}^2$</font> and <font color="2292B5">$F_i$</font> is the distribution function of
@@ -161,31 +158,31 @@ Cooley, D., Naveau, P. and Poncet, P., 2006. Variograms for spatial max-stable r
 - Estiamte this distance non-parametrically
 - Just going to consider hte clustering in terms of hte dependence
 </div>
-
+  
 ## Extremal Coefficient
-
+  
 For <font color="2292B5">$M_{x_i}$</font> and
 <font color="2292B5">$M_{x_j}$</font> with common GEV marginals is
 <font color="2292B5">$$\mathbb{P}\left( M_{x_i} \leq z, M_{x_j} \leq z \right) = \left[\mathbb{P}(M_{x_i}\leq z)\mathbb{P}(M_{x_i}\leq z)) \right]^{\tfrac{1}{2}\theta(x_i - x_j)}. %= \exp\left(\dfrac{-\theta(h)}{z}\right),$$</font>
-where <font color="2292B5">$\theta(x_i - x_j)$</font> is the extremal coefficient and the range of <font color="2292B5">$\theta(x_i - x_j)$ is $[1 , 2]$</font>.
+  where <font color="2292B5">$\theta(x_i - x_j)$</font> is the extremal coefficient and the range of <font color="2292B5">$\theta(x_i - x_j)$ is $[1 , 2]$</font>.
 
 Can express the F-madogram as:
-where <font color="2292B5">
-$$d(x_i, x_j) = \dfrac{\theta(x_i - x_j) - 1}{2(\theta(x_i - x_j) + 1)},$$</font>
-so the range of <font color="2292B5">$d(x_i, x_j)$</font> is <font color="2292B5">$[0 , 1/6]$</font>.
+  where <font color="2292B5">
+  $$d(x_i, x_j) = \dfrac{\theta(x_i - x_j) - 1}{2(\theta(x_i - x_j) + 1)},$$</font>
+  so the range of <font color="2292B5">$d(x_i, x_j)$</font> is <font color="2292B5">$[0 , 1/6]$</font>.
 
 <div class="notes">
-- Extremal coefficient is a measure for parital dependence
+  - Extremal coefficient is a measure for parital dependence
 - Using it for clustering, means our clsuters will have a natural interpretation
 - Importnat to note the range (talk about that again in a little bit)
 </div>
-
+  
 ## Clustering
 <br><br>
 $\checkmark$ Distance
 
 <br><br><br>
-$?$ Algorithm
+  $?$ Algorithm
 
 ## K-Medoids Clustering and PAM
 
@@ -193,14 +190,14 @@ $?$ Algorithm
 2. Assign each station, <font color="2292B5">$x_i$</font>, to its closest medoid, <font color="2292B5">$m_k$</font>, based on the F-madogram distance.
 3. For each cluster, <font color="2292B5">$C_k$</font>, update the medoid according to
 <font color="2292B5">
-$$m_k = \mathop{\mathrm{argmin}}\limits_{x_i \in C_k} \sum_{x_j \in C_k} d(x_i, x_j).$$</font>
-4. Repeat steps 2. -- 4. until the medoids are no longer updated.
+  $$m_k = \mathop{\mathrm{argmin}}\limits_{x_i \in C_k} \sum_{x_j \in C_k} d(x_i, x_j).$$</font>
+  4. Repeat steps 2. -- 4. until the medoids are no longer updated.
 
 <br>
-<font size="3">Kaufman, L. and Rousseeuw, P.J., 1990. Partitioning around medoids (PAM). Finding groups in data: an introduction to cluster analysis, pp.68-125.</font>
-
+  <font size="3">Kaufman, L. and Rousseeuw, P.J., 1990. Partitioning around medoids (PAM). Finding groups in data: an introduction to cluster analysis, pp.68-125.</font>
+  
 ## Result
-
+  
 ```{r, echo = FALSE, warning = FALSE}
 
 plot_coords = readRDS(paste(wdir, "plot_coords.rds", sep =  "/"))
@@ -213,16 +210,16 @@ gg_color_hue <- function(n) {
 }
 
 plot_coords <- plot_coords %>%
-  mutate(temp = if_else(distance_type == plot_coords$distance_type[1],  
-                   T, F)) %>%
+  mutate(temp = if_else(distance_type == plot_coords$distance_type[1],
+                        T, F)) %>%
   mutate(cluster_id = cluster_id + temp*10) %>%
   mutate(cluster_id = if_else(cluster_id == 12, 1, cluster_id)) %>%
   mutate(cluster_id = if_else(cluster_id == 11, 3, cluster_id)) %>%
   mutate(cluster_id = if_else(cluster_id == 15, 2, cluster_id)) %>%
   mutate(cluster_id = if_else(cluster_id == 17, 4, cluster_id)) %>%
   mutate(cluster_id = if_else(cluster_id == 13, 7, cluster_id)) %>%
-  mutate(cluster_id = if_else(cluster_id == 16, 8, cluster_id)) %>%
-  mutate(cluster_id = if_else(cluster_id == 14, 6, cluster_id)) 
+  mutate(cluster_id = if_else(cluster_id == 16, 5, cluster_id)) %>%
+  mutate(cluster_id = if_else(cluster_id == 14, 6, cluster_id))
 
 plot_title = "K-medoids clustering"
 
@@ -231,8 +228,9 @@ cluster_plot <- ggplot() +
                filter(distance_type == plot_coords$distance_type[1]),
              aes(x = longitude, y = latitude,
                  col = as.factor(cluster_id),
-                 shape = as.factor(cluster_id%%6)), size = 0.8) + #,
-                 # group = distance_type)) +
+                 shape = as.factor(cluster_id%%6),
+                 key = cluster_id), size = 0.8) + #,
+  # group = distance_type)) +
   coord_fixed() +
   # facet_wrap(~distance_type, ncol = 2) +
   geom_path(data = mainland_df, aes(x = Long, y = Lat)) +
@@ -252,7 +250,7 @@ cluster_plot <- ggplot() +
         plot.title = text.type.large,
         axis.title = text.type.large)
 
-ggplotly(cluster_plot)
+ggplotly(cluster_plot, source = "select", tooltip = c("key"))
 ```
 
 ## Example
@@ -365,39 +363,39 @@ ggplotly(density_eg_plot, tooltip = c("text"))
 * Ensure there are sufficient medoids
 
 <br>
-
-* Spatial density is changed by land-sea and domain boundaries  
-
-<br>
-
-* Tendancy toward clusters of equal size 
+  
+  * Spatial density is changed by land-sea and domain boundaries  
 
 <br>
+  
+  * Tendancy toward clusters of equal size 
 
-* Clustering is in F-madogram space not Euclidean  
+<br>
+  
+  * Clustering is in F-madogram space not Euclidean  
 
 ## Hierarchical Clustering
 
 <center>
-<img src= "img/TAS_linkage_average.png" width = 50%>
-</center>
-
-<font color="2292B5">**Linkage Rule:**</font>
-For each pair of clusters, <font color="2292B5">$C_k$</font> and <font color="2292B5">$C_k'$</font>
+  <img src= "talk_img/TAS_linkage_average.png" width = 50%>
+  </center>
+  
+  <font color="2292B5">**Linkage Rule:**</font>
+  For each pair of clusters, <font color="2292B5">$C_k$</font> and <font color="2292B5">$C_k'$</font>
 <!-- , define the distance between the clusters as -->
 <font color="2292B5">$$d(C_k, C_{k'}) = \frac{1}{|C_k| |C_{k'}|} \sum_{x_k \in C_k} \sum_{x_{k'} \in C_{k'}} d(x_k, x_{k'}).$$</font>
-
-<!-- ## Hierarchical Clustering -->
-
-<!-- 1. Each station starts in its own cluster -->
-<!-- 2. For each pair of clusters, <font color="2292B5">$C_k$</font> and <font color="2292B5">$C_k'$</font>, define the distance between the clusters as -->
-<!-- <font color="2292B5">$$d(C_k, C_{k'}) = \frac{1}{|C_k| |C_{k'}|} \sum_{x_k \in C_k} \sum_{x_{k'} \in C_{k'}} d(x_k, x_{k'}).$$</font> -->
-<!-- 3. Merge the the clusters with the smallest distance -->
-<!-- 4. Update the distances relative to the new cluster -->
-<!-- 5. Repaet steps 3 - 5, until all points are combined in a single cluster -->
-
+  
+  <!-- ## Hierarchical Clustering -->
+  
+  <!-- 1. Each station starts in its own cluster -->
+  <!-- 2. For each pair of clusters, <font color="2292B5">$C_k$</font> and <font color="2292B5">$C_k'$</font>, define the distance between the clusters as -->
+  <!-- <font color="2292B5">$$d(C_k, C_{k'}) = \frac{1}{|C_k| |C_{k'}|} \sum_{x_k \in C_k} \sum_{x_{k'} \in C_{k'}} d(x_k, x_{k'}).$$</font> -->
+  <!-- 3. Merge the the clusters with the smallest distance -->
+  <!-- 4. Update the distances relative to the new cluster -->
+  <!-- 5. Repaet steps 3 - 5, until all points are combined in a single cluster -->
+  
 ## Back to the first example
-
+  
 ```{r, echo = FALSE, warning = FALSE}
 
 plot_title = "Comparison"
@@ -406,7 +404,7 @@ plot_coords = readRDS(paste(wdir, "plot_coords.rds", sep =  "/"))
 
 plot_coords <- plot_coords %>%
   mutate(temp = if_else(distance_type == plot_coords$distance_type[1],  
-                   T, F)) %>%
+                        T, F)) %>%
   mutate(cluster_id = cluster_id + temp*10) %>%
   mutate(cluster_id = if_else(cluster_id == 12, 1, cluster_id)) %>%
   mutate(cluster_id = if_else(cluster_id == 11, 3, cluster_id)) %>%
@@ -415,7 +413,7 @@ plot_coords <- plot_coords %>%
   mutate(cluster_id = if_else(cluster_id == 13, 7, cluster_id)) %>%
   mutate(cluster_id = if_else(cluster_id == 16, 8, cluster_id)) %>%
   mutate(cluster_id = if_else(cluster_id == 14, 6, cluster_id)) 
-  
+
 
 cluster_plot1 <- ggplot() +
   geom_point(data = plot_coords,
@@ -441,7 +439,9 @@ cluster_plot1 <- ggplot() +
         plot.title = text.type.large,
         axis.title = text.type.large)
 
-ggplotly(cluster_plot1)
+# got a bug here - need to find out what it is!!!
+# ggplotly(cluster_plot1)
+cluster_plot1
 ```
 
 ## Classify
@@ -450,30 +450,31 @@ ggplotly(cluster_plot1)
 * Use a weighted classification $w$-kNN
 
 <center>
-<img src= "img/classification.png" width = 65%>
-
-<div class="notes">
-* clustering is so good not really much need
+  <img src= "talk_img/classification.png" width = 65%>
+  
+  <div class="notes">
+  * clustering is so good not really much need
 * Need to be able to classify locations without a station
 * Need to be able to identify regional boundaries
 </div>
-
+  
 ## Results
-
-<!-- ```{r regions, echo = FALSE} -->
-<!-- shinyAppDir("shiny_apps/region_summary/", options = list(width = "100%", height = 700)) -->
-<!-- ``` -->
+  
+```{r regions, echo = FALSE}
+shinyAppDir("shiny_apps/region_summary/", 
+            options = list(width = "100%", height = 700))
+```
 
 ## Choosing a cut height
-
-<center>
-<img src= "img/missing_fmado.png" width = 100%>
-</center>
-
-<div class="notes">
-Depends on what you are trying to do?
-
-Lower cut heights ~0.115 stronger dependence
+  
+  <center>
+  <img src= "talk_img/missing_fmado.png" width = 100%>
+  </center>
+  
+  <div class="notes">
+  Depends on what you are trying to do?
+  
+  Lower cut heights ~0.115 stronger dependence
 
 Higher cut heights ~0.133 weaer dependence
 
@@ -483,85 +484,109 @@ Greater than 0.135 (very week depdence, starts to decrease rapidly to zero - clu
 
 Depends on the topography as well
 </div>
-
+  
 ## Similar Dependence
+  
+  <br>
+  <br>
+  <br>
+  <font color="2292B5"> **Where can we assume a common dependence structure for extremes?** </font >
 
-<br>
-<br>
-<br>
-<font color="2292B5"> **Where can we assume a common dependence structure for extremes?** </font >
-
+<div class="notes">
+* Created this regionalisation
+* Used a measure for partial dependence
+* How well do we do at creating regions of similar dependence
+* Can we assume a similar dependence structure
+</div>
+  
 # Visualising Dependence
 
 ## Max-stable Processes
+  
+<!-- <font color="2292B5"> **Advantages:** </font > -->
 
-* Extremes in continuous space with dependence <br/>
-<br/>
-* Natural extension from univariate extreme value theory  <br/>
-<br/>
-* Univariate marginal distributions are GEV distributions <br/>
-<br/>
-* Can simulate from these processes
+  * Extremes in continuous space with dependence <br/>
+  <br/>
+  * Natural extension from univariate extreme value theory  <br/>
+  <br/>
+  * Univariate marginal distributions are GEV distributions <br/>
+  <br/>
+  * Can simulate from these processes
 
-<!-- ## Max-stable processes and post-processing -->
+## Max-stable Process
 
-<!-- <font size="3">  -->
-<!-- Oesting, M., Schlather, M. and Friederichs, P., 2017. Statistical post-processing of forecasts for extremes using bivariate Brown-Resnick processes with an application to wind gusts. Extremes, 20(2), pp.309-332. -->
-<!-- </font> -->
+<center>
+<img src= "talk_img/unconditional_sims/Fig_UncondSim_10.jpeg" width = 24%>
+<img src= "talk_img/unconditional_sims/Fig_UncondSim_7.jpeg" width = 24%>
+<img src= "talk_img/unconditional_sims/Fig_UncondSim_8.jpeg" width = 24%>
+<img src= "talk_img/unconditional_sims/Fig_UncondSim_9.jpeg" width = 24%>
+<img src= "talk_img/unconditional_sims/Fig_UncondSim_1.jpeg" width = 24%>
+<img src= "talk_img/unconditional_sims/Fig_UncondSim_3.jpeg" width = 24%>
+<img src= "talk_img/unconditional_sims/Fig_UncondSim_4.jpeg" width = 24%>
+<img src= "talk_img/unconditional_sims/Fig_UncondSim_5.jpeg" width = 24%>
+<!-- <img src= "kate_img/unconditional_sims/Fig_UncondSim_6.jpeg" width = 24%> -->
+<!-- <img src= "img/unconditional_sims/legend.png" width = 30%> <br> -->
+<br />
+<center>
+<img src= "talk_img/unconditional_sims/legend.png" width = 30% align = "right">
+</center>
 
-<!-- * Fit two max-stable fields: observations and numerical model output -->
-<!-- <br> -->
+<div class="notes">
+- Realistic representations of the annual maximum rainfall field
+- Create multiple realisations
+- Evaluate largest rainfall in this region
+- Aggregate extreme rainfall across the region
+- Taken from an application in an earlier chapter, modelled influence of ENSO
+on the marginal distributions, looked at aggregate measure for rainfall
+- Neat maths under the hood here
+- Taking the maximum over infinitely many replicates of our stochastic process
+</div>
 
-<!-- * Model the dependence between these two fields -->
-<!-- <br> -->
-
-<!-- * Conditionally simulate observations based the max-stable field for the numerical model output -->
-<!-- <br> -->
-
-<!-- * Use these simulations to generate an ensemble and a probabilistic forecast of a spatial field -->
-
-## Smith Process
-
-<!-- ```{r, echo = FALSE} -->
-<!-- shinyAppDir("shiny_apps/Maxstable_sim/", -->
-<!--  options = list(width = "100%", height = 700) -->
-<!-- ) -->
-<!-- ``` -->
-
+## Smith Process (Canonical Example)
+  
+```{r, echo = FALSE}
+shinyAppDir("shiny_apps/Maxstable_sim/",
+  options = list(width = "100%", height = 700)
+)
+```
+  
 ## Visualising Dependence
-
+  
 * Visualise the partition using elliptical level curves
 
-<font color="2292B5">
-$$ \mathbb{P}(\| \mathbf{x} - \mathbf{c_k} \| < r) = 1 - \exp \left( \frac{-r^2}{2} \right)$$
-</font>
- 
+<br>
+
 * Centre the curve on the centroid of cluster $k$ <font color="2292B5">$\mathbf{c_k}$</font>
+
+<font color="2292B5">
+  $$ \mathbb{P}(\| \mathbf{x} - \mathbf{c_k} \| < r) = 1 - \exp \left( \frac{-r^2}{2} \right)$$
+  </font>
+
 * Repeat fitting by sampling stations to understand uncertainty
-* Size and direction of ellipses have a natural intepretation in terms dependence
+
+<!-- * Size and direction of ellipses have a natural intepretation in terms dependence -->
 
 ## Southwest Western Australia
 
 <center>
-<!-- <img src= "kate_img/smith_SWWA_low.jpg" width = 49%> -->
-<img src= "img/smith_SWWA_high.jpg" width = 49%>
-</center>
-
+  <img src= "talk_img/smith_SWWA_high.jpg" width = 49%>
+  </center>
+  
 ## Tasmania
-
-<center>
-<img src= "img/smith_TAS_low.jpg" width = 49%>
-<img src= "img/smith_TAS_high.jpg" width = 49%>
-</center>
+  
+  <center>
+  <img src= "talk_img/smith_TAS_low.jpg" width = 49%>
+  <img src= "talk_img/smith_TAS_high.jpg" width = 49%>
+  </center>
 
 ## Relevance to post-processing
-
+  
 <font size="3">
-Oesting, M., Schlather, M. and Friederichs, P., 2017. Statistical post-processing of forecasts for extremes using bivariate Brown-Resnick processes with an application to wind gusts. Extremes, 20(2), pp.309-332.
+  Oesting, M., Schlather, M. and Friederichs, P., 2017. Statistical post-processing of forecasts for extremes using bivariate Brown-Resnick processes with an application to wind gusts. Extremes, 20(2), pp.309-332.
 </font>
-
+  
 <font color="2292B5">**Perfect Prog Approach:**</font>  
-Simulate an ensemble from the fitted max-stable process
+Conditionally simulate an ensemble from the fitted max-stable process
 <br>
 
 <font color="2292B5">**Assumptions:**</font>   
@@ -573,21 +598,20 @@ Need to ensure how we model the dependence is accurate
 
 ## Conclusions
 
-* Create a regionalisation of Australia based on extremal dependence
+* Create a regionalisation of based on extremal dependence
 
-* Highlighted some considerations for clustering applications
+* Highlighted some considerations for clustering
 
-* Used the regionalisation to fit max-stable models
+* Used the regionalisation to inform fitting of max-stable models
 
 * Visualised extremal dependence
 
-* Helped us understand were we can reasonably assume
-a single dependence structure
+* Better idea of where a single dependence structure can be assumed
 
 ## Future work
 
 * Non-stationary dependence!
-
+  
 * Post-processing of compound events: Storm surge and Precipitation
 
 **e.** K.R.Saunders@tudelft.nl
@@ -599,8 +623,7 @@ a single dependence structure
 ## {.fullslide}
 
 <center>
-<img src="img/Storm_Vas.jpg">
+  <img src="talk_img/Storm_Vas.jpg">
 </center>
 
-
-
+<script src = "assets/delft.js"></script>  

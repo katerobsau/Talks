@@ -7,8 +7,8 @@ library(ggplot2)
 library(shiny)
 library(latex2exp)
 
-set.seed(20)
-n = 10
+set.seed(25)
+n = 20
 w = rexp(n, rate = 1)
 p = sort(1/w, decreasing = TRUE)
 num_signif = 2
@@ -55,10 +55,12 @@ server <- function(input, output){
         geom_point(data = NULL, aes(x = 0), y = p[input$simVal], col = "blue") +
         ylab("Intensity") +
         xlab("") +
-        ggtitle(TeX("$\\left{ \\zeta \\right}_{i=1}^{\\infty}$"), TeX("PPP $\\sim \\zeta ^{-2}$")) +
+        ggtitle(TeX("$\\left{\\zeta\\right}_{i=1}^{\\infty}$"), TeX("PPP $\\sim \\zeta ^{-2}$")) +
         theme_bw() +
         theme(axis.text.x=element_blank(),
-              axis.ticks.x=element_blank()) 
+              axis.ticks.x=element_blank(),
+              plot.title=element_text(size = 14),
+              plot.subtitle=element_text(size = 20)) 
     })
 
     
@@ -69,21 +71,25 @@ server <- function(input, output){
         theme_bw() + 
         xlim(limits = c(x_lower, x_upper)) +
         ylab("`Storm Shape'") +
-        ggtitle(TeX("$Y_i(x) = W(x - U_i)$"), TeX("$\\phi$ is a randomly centred Gaussian"))
+        ggtitle(TeX("$Y_i(x) = W(x - U_i)$"), TeX("$W$ is a standard Gaussian)", "randomly centred"))+
+        theme(plot.title=element_text(size = 20),
+              plot.subtitle=element_text(size = 14))
     })
     
     output$simPlot <- renderPlot({
       ggplot() + 
         geom_line(data = df_shape, aes(x= x, y =y, group = sim), col = "gray") +
         geom_line(data = df_shape %>% filter(sim == input$simVal), aes(x= x, y =y), col = "blue") +
-        geom_line(data = df_max, aes(x= x, y = y), size = 1.5, col = "red", 
-                  linetype = "dotted") +
+        geom_line(data = df_max, aes(x= x, y = y), size = 1.5, col = "red")+#, 
+                  # linetype = "dotted") +
         geom_point(data = df_max[seq(1, nrow(df_max), by = 10), ], aes(x= x, y = y), size = 1.5, col = "red", 
                   shape = 20) +
         theme_bw() + 
         xlim(limits = c(x_lower, x_upper)) +
         ylab("") +
-        ggtitle(TeX("Smith Process"), TeX("$Z(x) = \\max_{i\\geq 1} \\zeta_i Y_i(x)$"))
+        ggtitle(TeX("Smith Process"), TeX("$Z(x) = \\max_{i\\geq 1} \\zeta_i Y_i(x)$")) +
+        theme(plot.title=element_text(size = 20),
+              plot.subtitle=element_text(size = 14))
     })
     
 }
