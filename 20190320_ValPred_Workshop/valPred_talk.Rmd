@@ -42,7 +42,7 @@ To make statistical problems more tractable:
   <br>
   <br>
   <br>
-  $\cdot$ Partition a region eg. consider region by region
+  $\cdot$ Create a partition eg. consider region by region
 
 ## Climate example
 
@@ -162,12 +162,12 @@ Cooley, D., Naveau, P. and Poncet, P., 2006. Variograms for spatial max-stable r
 ## Extremal Coefficient
   
 For <font color="2292B5">$M_{x_i}$</font> and
-<font color="2292B5">$M_{x_j}$</font> with common GEV marginals is
+<font color="2292B5">$M_{x_j}$</font> with common Fréchet marginals is
 <font color="2292B5">$$\mathbb{P}\left( M_{x_i} \leq z, M_{x_j} \leq z \right) = \left[\mathbb{P}(M_{x_i}\leq z)\mathbb{P}(M_{x_i}\leq z)) \right]^{\tfrac{1}{2}\theta(x_i - x_j)}. %= \exp\left(\dfrac{-\theta(h)}{z}\right),$$</font>
   where <font color="2292B5">$\theta(x_i - x_j)$</font> is the extremal coefficient and the range of <font color="2292B5">$\theta(x_i - x_j)$ is $[1 , 2]$</font>.
 
 Can express the F-madogram as:
-  where <font color="2292B5">
+  <font color="2292B5">
   $$d(x_i, x_j) = \dfrac{\theta(x_i - x_j) - 1}{2(\theta(x_i - x_j) + 1)},$$</font>
   so the range of <font color="2292B5">$d(x_i, x_j)$</font> is <font color="2292B5">$[0 , 1/6]$</font>.
 
@@ -196,7 +196,7 @@ $\checkmark$ Distance
 <br>
   <font size="3">Kaufman, L. and Rousseeuw, P.J., 1990. Partitioning around medoids (PAM). Finding groups in data: an introduction to cluster analysis, pp.68-125.</font>
   
-## Result
+## Example: Southwest Western Australia
   
 ```{r, echo = FALSE, warning = FALSE}
 
@@ -513,6 +513,55 @@ Depends on the topography as well
   <br/>
   * Can simulate from these processes
 
+## Max-Stable Definition
+
+Let <font color="2292B5">$\{Z_i\}_{i \geq 1}$</font> be a sequence of independent copies of a stochastic process
+<font color="2292B5">$\{ Z(x) : x \in \mathcal{X} \subset \mathbb{R}^2 \}$</font>. <br />
+<br />
+The process
+<font color="2292B5">$Z(x)$</font> is max-stable, if there exist normalising functions,
+<font color="2292B5">$\{a_n(x)\} \in \mathbb{R}^+$</font> and
+<font color="2292B5">$\{b_n(x)\} \in \mathbb{R}$</font>, such that
+<font color="2292B5">$$	Z(x) \stackrel{d}{=} \lim_{n\to\infty} \dfrac{ \max _{i=1,\dots,n} Z_i(x) - b_{n}(x) }{ a_{n}(x) }, \quad x \in \mathcal{X}.$$
+</font>
+If the limiting process for the partial maxima process exists and is non-degenerate, then it is a max-stable process.
+
+(De Haan 2006)
+
+## Spectral Representation
+
+Any non-degenerate simple max-stable process
+<font color="2292B5">$\{ Z(x): x \in \mathcal{X}\}$</font> defined on a compact set <font color="2292B5">$\mathcal{X} \subset \mathbb{R}^2$</font>, with continuous sample paths satisfies
+<font color="2292B5">$$	Z(x) \stackrel{d}{=} \max_{i \geq 1} \zeta_i Y_i(x), \quad\quad x \in \mathcal{X}, $$</font>
+where <font color="2292B5">$\{\zeta_i: i \geq 1 \}$</font> are points of a Poisson process on
+<font color="2292B5">$(0, \infty)$</font> with intensity
+<font color="2292B5">$\zeta^{-2}\hbox{d}\zeta$</font>, and
+<font color="2292B5">$Y_i$</font> are independent copies of a non-negative stochastic process
+<font color="2292B5">$\{Y(x): x\in \mathcal{X}\}$</font> with continuous sample paths such that the
+<font color="2292B5">$\mathbb{E}\lbrace Y(x) \rbrace = 1$</font> for all
+<font color="2292B5">$x \in \mathcal{X}$</font>.
+
+(De Haan 1984, Schlather 2002)
+
+## Parametric Forms
+
+**Smith Process** (Smith 1990)
+<font color="2292B5"> $$Y_i(x) = W(x-U_i; 0, \Sigma), \quad x \in \mathcal{X}$$</font>
+where <font color="2292B5">$\mathcal{X} \in \mathbb{R}$</font>, <font color="2292B5"> $W(\cdot, 0, \Sigma)$</font> is the bivaraite Gaussian density, with mean zero and covariance matrix <font color="2292B5">$\Sigma$</font> and 
+<font color="2292B5">$U_i$</font> are points of a homogeneous Poisson Process on <font color="2292B5">$\mathbb{R}^2$</font>.
+
+**Extemal-t Process** (Otpiz 2013)
+<font color="2292B5"> $$Y_i(x) = g(\nu) \max\{0, W_i(x)\}^\nu, \quad x \in \mathcal{X}$$</font>
+where <font color="2292B5">$\nu \geq 1$</font>, <font color="2292B5"> $g(\nu)$</font> normalising constance and <font color="2292B5">$\{W_i(x):x \in \mathcal{X} \}$</font> are indpendent copies of a stationary standard Guassian process with correlation function <font color="2292B5">$\rho(h)$</font>.
+
+## Smith Process (Canonical Example)
+  
+```{r, echo = FALSE}
+shinyAppDir("shiny_apps/Maxstable_sim/",
+  options = list(width = "100%", height = 700)
+)
+```
+
 ## Max-stable Process
 
 <center>
@@ -541,14 +590,6 @@ on the marginal distributions, looked at aggregate measure for rainfall
 - Neat maths under the hood here
 - Taking the maximum over infinitely many replicates of our stochastic process
 </div>
-
-## Smith Process (Canonical Example)
-  
-```{r, echo = FALSE}
-shinyAppDir("shiny_apps/Maxstable_sim/",
-  options = list(width = "100%", height = 700)
-)
-```
   
 ## Visualising Dependence
   
@@ -625,5 +666,102 @@ Need to ensure how we model the dependence is accurate
 <center>
   <img src="talk_img/Storm_Vas.jpg">
 </center>
+
+
+## Standard Formulation
+
+Let <font color="2292B5">$X_i$</font> be a sequence of iid random variables, define
+<font color="2292B5">$$M_{n} = \max\{X_1, \dots, X_{n}\}.$$</font>
+
+The distribution function of <font color="2292B5">$M_n$</font>  is
+<font color="2292B5">$$\mathbb{P}(M_n \leq z) = \mathbb{P}(X_1 \leq z, \dots, X_n \leq z) = \mathbb{P}(X \leq z)^n = F(z)^n,$$</font>
+where <font color="2292B5">$F(z)$</font>  is the distribution function of <font color="2292B5">$X$</font> .
+
+Let <font color="2292B5">$z^F$</font>  denote the right endpoint of the support of <font color="2292B5">$F$</font> ,
+<font color="2292B5">$$z^F = \sup \{z : F(z) < 1\},$$</font>
+then as <font color="2292B5">$n \rightarrow \infty$</font>, <font color="2292B5">$F(z)^n \rightarrow 0$</font> for any <font color="2292B5">$z < z^F$</font>.
+
+## GEV Distribution
+
+If there exists sequences of constants
+  <font color="2292B5">$\{a_n\} \in \mathbb{R}^+$</font> and
+  <font color="2292B5">$\{b_n\} \in \mathbb{R}$</font>
+  such that
+<font color="2292B5">$$\mathbb{P} \left\{\dfrac{M_n - b_n}{a_n} \leq z \right \} \rightarrow G(z) \quad\hbox{as}\quad\, n \rightarrow \infty
+$$</font>
+where
+  <font color="2292B5">$G(z)$</font> is a non-degenerate distribution function, then
+  <font color="2292B5">$G(z)$</font> is a member of the generalised extreme value (GEV) family
+<font color="2292B5">$$
+ 	G(z) = \exp \left\{ - \left[ 1 + \xi \left(\dfrac{z-\mu}{\sigma}\right) \right]_+^{-1 / \xi} \right\},$$</font>
+where
+  <font color="2292B5">$[v]_+ = \max \left\lbrace 0,v \right\rbrace$</font>,
+  <font color="2292B5">$\mu \in \mathbb{R}$</font>,
+  <font color="2292B5">$\sigma \in \mathbb{R}^+$</font> and
+  <font color="2292B5">$\xi \in \mathbb{R}$</font>.
+  
+(Fisher and Tippett 1928, Gnendenko 1943)
+\citep{fisher1928limiting, gnedenko1943distribution}
+
+<!-- ## GEV Distribution -->
+
+<!-- Parameters: location is <span style="color:#2292B5"> $\mu$ </span>, scale is <span style="color:#2292B5"> $\sigma$ </span> and the shape is <span style="color:#2292B5"> $\xi$ </span>. -->
+
+<!-- ```{r, echo = FALSE} -->
+<!-- shinyAppDir("shiny_apps/GEV_slider/",  -->
+<!--   options = list(width = "100%", height = 700) -->
+<!--    ) -->
+<!-- ``` -->
+
+## Practicalities
+
+<font color="2292B5">**Why approximate the $\mathbb{P}(M_n \leq z)$ by the GEV distribution?**</font>  
+
+<div class="notes">
+Key Points:
+- Most of the time, we don't have a lot of data
+- Estimate the probability of rare events
+- So events that we've only seen once or twice, or maybe never at all
+- By approximating by the limit distribution, have justification for extrolapolation outside the range of our data
+</div>
+
+## Practicalities
+
+<font color="lightgray">**Why approximate the $\mathbb{P}(M_n \leq z)$ by the GEV distribution?**</font>    
+<br />  
+<br />
+<br />
+<font color="2292B5">**Rainfall observations aren't independent**</font>  
+<br />  
+<br />
+<br />
+
+## Practicalities
+
+<font color="lightgray">**Why approximate the $\mathbb{P}(M_n \leq z)$ by the GEV distribution?**</font>    
+<br />  
+<br />
+<br />  
+<font color="lightgray">**Rainfall observations aren't independent**</font>    
+<br />  
+<br />
+<br /> 
+<font color="2292B5">**Rainfall observations aren't identically distributed**</font>  
+<!-- Okay - provided data meets conditions preventing long range dependence (Leadbetter 1983)   -->
+
+## Modelling
+
+<font color="2292B5">**Want to make inference about the extremes of a rainfall field**</font><br />
+<center>
+<img src= "kate_img/unconditional_sims/Fig_UncondSim_2.jpeg" width = 60%><br />
+<center>
+<img src= "kate_img/unconditional_sims/legend.png" width = 30% align = "right">
+
+<div class="notes">
+Want to understand how rainfall impacts a region
+Not just point location
+Moreover, also need to understand how extreme rainfall will impact locations without a station
+Need a model that works in continuous space with dependence
+</div>
 
 <script src = "assets/delft.js"></script>  
