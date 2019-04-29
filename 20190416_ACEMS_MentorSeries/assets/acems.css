@@ -1,0 +1,143 @@
+.footer-banner {
+  background-color: #099EA2;
+  width: 100%;
+  height: 7%;
+  position: absolute;
+  left: 0;
+  top: 94%;
+}
+
+.header-underline {
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  border-bottom-color: #099EA2;
+}
+
+.slide-logo-text {
+  position: absolute;
+  left: 5%;
+  top: 94%;
+  height: 7%;
+}
+
+.slide-logo-flame {
+  position: absolute;
+  left: 85%;
+  top: 0;
+  height: 15%;
+}
+
+/* title slide */
+
+/* text format */
+
+.title-slide hgroup {
+  position: absolute;
+  left: 5%;
+  top: 30%;
+  width: 85%;
+  height: 40%;
+}
+
+.title-slide hgroup h1 {
+  position: relative;
+  text-shadow: 2px 1px gray;
+  top: 10%;
+  text-align: left;
+  left: 5%;
+  font-size: 40px;
+  color: white;
+}
+
+/*sub-title placeholder
+/*.title-slide hgroup h2 {
+}*/
+
+.title-slide p {
+  position: relative;
+  top: 20%;
+  text-align: left;
+  left: 5%;
+}
+
+.title-slide hgroup p {
+  text-shadow: 1px 0.5px gray;
+  color: white;
+}
+
+/* small blue box top left */
+
+.title-header-1 {
+  background-color: #099EA2;
+  width: 5%;
+  height: 30%;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* black box centre */
+
+.title-header-2 {
+  background-color: #000000;
+  width: 80%;
+  height: 20%;
+  position: absolute;
+  opacity: 0.4;
+  left: 5%;
+  top: 30%;
+}
+
+.title-header-3 {
+  background-color: #099EA2;
+  width: 80%;
+  height: 10%;
+  position: absolute;
+  opacity: 0.4;
+  left: 5%;
+  top: 50%;
+}
+
+/* footer banners */
+
+.title-header-4 {
+  background-color: #099EA2;
+  width: 100%;
+  height: 1.5%;
+  position: absolute;
+  left: 0;
+  top: 98.5%;
+}
+
+.title-header-5 {
+  background-color: #FFFFFF;
+  width: 100%;
+  height: 7%;
+  position: absolute;
+  left: 0;
+  top: 91.5%;
+}
+
+.title-logo-text {
+  position: absolute;
+  left: 5%;
+  top: 92.5%;
+  height: 7%;
+}
+
+/* background stock picture */
+
+.slide-background {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.title-background {
+  position: absolute;
+  left: 5%;
+  top: 0;
+  height: 100%;
+}
