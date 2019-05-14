@@ -6,7 +6,7 @@ output:
   ioslides_presentation:
     css: assets/delft_style.css
     runtime: shiny
-    # widescreen: yes
+    widescreen: yes
 ---
   
 <style>
