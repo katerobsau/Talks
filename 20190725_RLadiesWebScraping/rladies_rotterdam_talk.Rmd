@@ -5,11 +5,9 @@ date: "RLadies Rotterdam"
 output: 
   ioslides_presentation:
     css: assets/rladies.css
-    # runtime: shiny
 ---
 
 ```{r setup, include = FALSE}
-# addResourcePath("assets", "assets/")   # Must include this line !
 library(rvest)
 library(tidyverse)
 library(plotly)
@@ -110,16 +108,6 @@ devtools::install_github("famguy/rgoodreads")
 
 <br><br>
 <font color="#8B008B">**But I can share what I know**</font> 
-
-# Tidyverse refresher
-
-## Favourites
-
-* Pipe (magrittr)
-```{r}
-
-```
-
 
 # Webpage basics
 
@@ -340,7 +328,7 @@ Also know:
 book_list_url <- "https://mizparker.wordpress.com/the-lists/1001-books-to-read-before-you-die/"
 paragraph_data <- read_html(book_list_url) %>% # read the web page
   rvest::html_nodes("p") # get the paragraphs
-str(paragraph_data)
+head(paragraph_data)
 ```
 
 ## Get the book list from the paragraphs 
@@ -480,10 +468,21 @@ Get_nationality_from_infocard <- function(infocard){
 }
 
 Get_first_text <- function(wiki_data){
-  wiki_data %>%
-    rvest::html_nodes("p") %>%
-    purrr::pluck(2) %>% # get the second paragraph
-    rvest::html_text()
+  paragraph_data <- wiki_data %>%
+    rvest::html_nodes("p")
+  i = 1
+  no_text = TRUE
+  while(no_text){
+    text_data <- paragraph_data %>%
+      purrr::pluck(i) %>% 
+      rvest::html_text() 
+    check_text = gsub("\\s+", "", text_data)
+    if(check_text == ""){
+      i = i + 1
+    }else{
+      no_text = FALSE
+    }
+  }
   return(text_data)
 }
 
@@ -495,9 +494,10 @@ Guess_nationality_from_text <- function(text_data, possible_nationalities){
     prob_nationality = possible_nationalities[i] 
   }else if(length(i) > 0){
     warning(paste(c("More than one match for the nationality:", 
-                  possible_nationalities[i]), collapse = " "))
-    i = which.max(prob_matches)
-    prob_nationality = possible_nationalities[i] 
+                  possible_nationalities[i], "\n"), collapse = " "))
+    match_locations = str_locate(text_data, possible_nationalities[i])
+    j = i[which.min(match_locations[,1])]
+    prob_nationality = possible_nationalities[j] 
   }else{
     return(NA)
   }
@@ -507,7 +507,9 @@ Guess_nationality_from_text <- function(text_data, possible_nationalities){
 Query_nationality_from_wiki <- function(search_string, possible_nationalities = NULL){
   wiki_data <- Read_wiki_page(search_string)
   infocard <- Get_wiki_infocard(wiki_data)
-  if(any(infocard[,1] == "Nationality")){
+ if(is.null(infocard)){
+    nationality <- "Missing infocard"
+  }else if(any(infocard[,1] == "Nationality")){
     nationality <- Get_nationality_from_infocard(infocard)
   }else{
     first_paragraph <- Get_first_text(wiki_data)
@@ -519,10 +521,12 @@ Query_nationality_from_wiki <- function(search_string, possible_nationalities = 
 ```
 
 ```{r, eval = FALSE, linewidth = 80}
-search_string = "Jane Austen"
+search_string = "Tim Winton"
 wiki_data <- Read_wiki_page(search_string)
 infocard <- Get_wiki_infocard(wiki_data)
-if(any(infocard[,1] == "Nationality")){
+if(is.null(infocard)){
+  nationality <- "Missing infocard"
+}else if(any(infocard[,1] == "Nationality")){
   nationality <- Get_nationality_from_infocard(infocard)
 }else{
   first_paragraph <- Get_first_text(wiki_data)
@@ -546,11 +550,21 @@ nationalities_df <- url %>%
   html_nodes(xpath = xpath) %>%
   html_table() %>% 
   as.data.frame()
+
+possible_nationalities = nationalities_df[,2]
+head(possible_nationalities)
 ```
 
 ## Manual fixing
 
 ```{r}
+fix_entry = "ArgentineArgentinian"
+i0 = which(nationalities_df == fix_entry, arr.ind = TRUE)
+new_row = nationalities_df[i0[1], ]
+nationalities_df[i0] = "Argentine"
+new_row[,2] = "Argentinian"
+nationalities_df = rbind(nationalities_df, new_row)
+
 fix_footnote1 = "Colombia *"
 i1 = which(nationalities_df == fix_footnote1, arr.ind = TRUE)
 nationalities_df[i1] = strsplit(fix_footnote1, split = ' ')[[1]][1]
@@ -560,33 +574,37 @@ i2 = which(nationalities_df == fix_footnote2, arr.ind = TRUE)
 nationalities_df[i2] = strsplit(fix_footnote2, split = ' ')[[1]][1]
 
 possible_nationalities = nationalities_df[,2]
-head(possible_nationalities)
 ```
 
 ## Get Nationalities
 
 ```{r, eval = FALSE, linewidth = 80}
-nationality_from_author_search = sapply(book_data$author[1:20],
+nationality_from_author_search = sapply(book_data$author[1:20],  
                                         function(search_string){
   nataionality = tryCatch( # Just in case!
      Query_nationality_from_wiki(search_string, 
                                  possible_nationalities),
     error = function(e) NA)
-  }) %>% unlist() %>% table()
+  }) %>% unlist()
+nationality_from_author_search
 ```
 
 ## Run it!
 
 ```{r, eval = FALSE, linewidth = 80}
-nationality_from_author_search = sapply(book_data$author, function(search_string){
+nationality_from_author_search = sapply(book_data$author %>% unique(),  
+                                        function(search_string){
+  print(search_string)
   nataionality = tryCatch( # Just in case!
      Query_nationality_from_wiki(search_string, 
                                  possible_nationalities),
     error = function(e) NA)
   }) 
-
+author_nationality_df <- as.data.frame(nationality_from_author_search) %>%
+  dplyr::mutate(author = rownames(.))
+names(author_nationality_df) <- c("nationality", "author")
 book_data <- book_data %>%
-  dplyr::mutate(nationality = nationality_from_author_search)
+  dplyr::left_join(author_nationality_df)
 head(book_data)
 
 save(book_data, file = "book_data.RData")
@@ -596,7 +614,10 @@ save(book_data, file = "book_data.RData")
 
 ```{r}
 load("book_data.RData")
-table_nationalities <- book_data$nationality %>% 
+table_nationalities <- book_data %>% 
+  dplyr::select(author, nationality) %>%
+  dplyr::distinct() %>%
+  dplyr::select(nationality) %>%
   unlist() %>% 
   table() %>% 
   as.data.frame(stringsAsFactors = FALSE)
@@ -609,40 +630,47 @@ head(table_nationalities)
 ## Let's take a look
 
 ```{r, linewidth = 80}
-plot_df = table_nationalities  %>%
-  dplyr::filter(Frequency > 1) 
-
-counted = sum(table_nationalities$Frequency)
-new_row = data.frame(Nationality = "Other", 
-                     Frequency = counted - sum(plot_df$Frequency))
-plot_df <- rbind(plot_df, new_row)
-
-pie_chart <- ggplot(plot_df) + 
-  geom_bar(aes(x= "", y = Frequency, fill = Nationality), stat = "identity") +
-  coord_polar("y", start=0) +
-  theme(legend.position = "none")
+pie_plot <- table_nationalities %>%
+  plot_ly(labels = ~Nationality, values = ~Frequency) %>%
+  add_pie(hole = 0.6) %>%
+  layout(title = "Nationalities",  showlegend = F,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 ```
 
-## Plotting Result
+## Plotting result
 
 ```{r pie, echo = FALSE}
-print(pie_chart)
+pie_plot
 ```
 
-## What next for books
+## A Few thoughts
+
+* So many ways to approach this problem
+* This was question for me for fun
+* Approach here was to use the standard rvest toolbox
+* Not perfect - much needed cleaning of nationality strings 
+
+## What else could we have done
  
-* Much needed cleaning of nationality strings 
 * Can scrape more data from goodreads website
 * Goodreads has an API
 * Check out the repository by famguy/rgoodreads to get started
-* Using an API makes querying things like year or gender easier
+* Using this API makes querying things like year or gender straightforward
 * But goodreads has no nationality, so this solution still is useful!
 
-## What next for webscraping
+## What else for webscraping
 
-* This solution works fine for rvest
 * There are easier ways to answer this same question
 * Namely, RSelenium for pages with javascript
 * Learning the hard way can be good sometimes though!
+
+```{r eval = FALSE, echo = FALSE}
+# pie_chart <- ggplot(plot_df) + 
+#   geom_bar(aes(x= "", y = Frequency, fill = Nationality), stat = "identity") +
+#   coord_polar("y", start=0) +
+#   theme(legend.position = "none")
+```
+
 
 <script src = "assets/rladies.js"></script>
