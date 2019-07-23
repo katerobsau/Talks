@@ -78,8 +78,7 @@ knit_hooks$set(output = function(x, options) {
 ```{r eval = FALSE}
 library(rvest)
 library(tidyverse)
-library(devtools)
-devtools::install_github("famguy/rgoodreads")
+library(plotly)
 ```
 
 ## Disclaimer
