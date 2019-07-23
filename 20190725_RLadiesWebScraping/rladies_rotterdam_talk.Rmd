@@ -315,7 +315,7 @@ Also know:
 
 <font color="#8B008B">**Back to the original question ... ** </font> 
 
-# How diversely do we read
+# Get our list
 
 ## 1001 books to read
 
@@ -436,7 +436,9 @@ head(book_data) # Looks pretty good at first glance
 
 <font color="#8B008B">Now let's get the nationalities of all the authors!</font>
 
-## Get the nationality
+# Get nationalities
+
+## More wrapping
 
 Also wrap our code up pieces to get the nationality
 
@@ -588,6 +590,8 @@ nationality_from_author_search = sapply(book_data$author[1:20],
 nationality_from_author_search
 ```
 
+# How diversely do we read
+
 ## Run it!
 
 ```{r, eval = FALSE, linewidth = 80}
@@ -646,9 +650,9 @@ pie_plot
 ## A Few thoughts
 
 * So many ways to approach this problem
-* This was question for me for fun
 * Approach here was to use the standard rvest toolbox
 * Not perfect - much needed cleaning of nationality strings 
+* A bit of quessing of nationalities
 
 ## What else could we have done
  
