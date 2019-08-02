@@ -403,7 +403,7 @@ Could vectorise it properly, but we leave that for later.
 For now we'll just wrap that our code snippets in a function and use lapply
 
 ```{r, linewidth = 80}
-Get_book_data <- function(para_ind){
+Get_book_data <- function(para_ind, pargraph_data){
   
   book_str <- paragraph_data %>%
     purrr::pluck(para_ind) %>%
@@ -427,7 +427,8 @@ Get_book_data <- function(para_ind){
 ## Put it together
 
 ```{r}
-book_data <- lapply(seq(4,12,2) %>% as.list(), Get_book_data) %>% 
+book_data <- lapply(seq(4,12,2) %>% as.list(), 
+                    Get_book_data, paragraph_data) %>% 
   do.call(rbind, .) %>% 
   dplyr::mutate(author = str_trim(author))
 nrow(book_data) # Has 1001 rows so let's assume we are all good!
@@ -496,7 +497,7 @@ Guess_nationality_from_text <- function(text_data, possible_nationalities){
   }else if(length(i) > 0){
     warning(paste(c("More than one match for the nationality:", 
                   possible_nationalities[i], "\n"), collapse = " "))
-    match_locations = str_locate(text_data, possible_nationalities[i])
+    match_locations = str_locate(text_data, possible_nationalities[i]) #gives locations of matches
     j = i[which.min(match_locations[,1])]
     prob_nationality = possible_nationalities[j] 
   }else{
@@ -625,7 +626,7 @@ table_nationalities <- book_data %>%
   table() %>% 
   as.data.frame(stringsAsFactors = FALSE)
 names(table_nationalities ) = c("Nationality", "Frequency")
-table_nationalities %>% 
+table_nationalities <- table_nationalities %>% 
   arrange(desc(Frequency))
 head(table_nationalities)
 ```
