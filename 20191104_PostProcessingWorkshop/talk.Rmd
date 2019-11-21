@@ -167,6 +167,15 @@ Three compound types that increase the flood risk:
 <font color="#00A6D6">  **Mechanism (3): Heavy/Extreme Rainfall** </font> combined with a moderate storm surge that prevents discharge of rainfall run-off using gravity-fed drainage
 <!-- </p> -->
 
+## Side comment 
+
+<br><br>
+<font color="#00A6D6"> **Mechanism (1): Both Extreme** </font>
+<br><br>
+The dependence relationship between storm surge height and rainfall amount is very weak! 
+<br><br><br><br><br><br>
+(Zheng et al.  2014, Bevacqua et al. 2019) 
+
 ## Risk Duration and Height Surge 
 
 <center>
@@ -215,29 +224,21 @@ surge_plot
 
 # Event Based Approach
 
-## Problem set up 
+## Objective 
 
-<br><br>
+<br><br><br>
 <font color="#00A6D6">  **Want to forecast timing or duration dependent variables** </font>
 
-* Includes duration that the sluice is not able to be used
+## Objective 
 
-* Includes aggregated rainfall prior to the start of the surge
+<br><br><br>
+<font color="#00A6D6">  **Want to forecast timing or duration dependent variables** </font>
+<br><br><br>
+<font color="#00A6D6">  **and evaluate how good these forecasts are** </font>
 
-## Problem set up 
+<!-- * Includes the duration that the sluice is not able to be used -->
 
-<br><br>
-<font color="gray">  **Want to forecast timing or duration dependent variables** </font>
-
-* Includes duration that the sluice is not able to be used
-
-* Includes aggregated rainfall prior to the start of the surge
-
-<br><br>
-<font color="#00A6D6"> 
-**For the remainder of this talk:**</font>  
-
-Let's just think about an event based approach for storm surge
+<!-- * Includes the aggregated rainfall prior to the surge event -->
 
 ## Ensemble: Storm Surge Trajectories
 
@@ -249,6 +250,27 @@ Let's just think about an event based approach for storm surge
 <center>
 <img src= "slides_img/trajectory_members_sur.png" width = 90%>
 
+## Forecast Features 
+
+In some forecast window $K$:
+
+* Does the storm surge peak after time $T$?
+
+$$g(t; k) = \mathbb{1}\left(\displaystyle{\text{argmax}_{k \in K}} \left( S_{t+k} \right) > T \right)$$
+
+* Is the maximum height of the storm surge greater than $S$?
+
+$$g(t; k) = \mathbb{1}\left( \displaystyle{\text{max}_{k \in K}} \left( S_{t+k} \right) > S \right)$$
+
+* Is the storm surge duration longer than duration $D$?
+
+$$g(t; k) = \mathbb{1}\left\lbrace \left( \tfrac{1}{K\Delta{k}}\sum_{k \in K} \mathbb{1}\left(S_{t+k} > 0 \right)\right) > D   \right\rbrace$$
+
+## Forecast Features ctd. 
+
+* Is duration the total level is above a risk threshold,  $r$, greater than $D$?
+
+$$g(t; k, r) = \mathbb{1}\left\lbrace \left( \tfrac{1}{K\Delta{k}}\sum_{k \in K} \mathbb{1}\left(S_{t+k} + h_{t+k} > r \right) \right) > D \right\rbrace$$
 <!-- ## Notation  -->
 
 <!-- * Let ${S_t}$ for be the stochastic process representing the storm surge height at time $t$   -->
@@ -258,24 +280,6 @@ Let's just think about an event based approach for storm surge
 <!-- * ${h_t}$ as the height of the harmonic tide (deterministic)   -->
 
 <!-- * $S_{t+k|t}$ be the the forecast initialised at time $t$ and with lead time $k$. -->
-
-## Forecast Features 
-
-* When does the storm surge peak?
-
-$$g(\mathbf{s}_t; k) = \displaystyle{\text{argmax}_{k \in K}} \left( S_{t+k} \right)$$
-
-* What is the maximum height of the storm surge?
-
-$$g(\mathbf{s}_t; k) = \displaystyle{\text{max}_{k \in K}} \left( S_{t+k} \right)$$
-
-* How long does the storm surge last?
-
-$$g(\mathbf{s}_t; k) = \tfrac{1}{K\Delta{k}}\sum_{k \in K} \mathbb{1}\left(S_{t+k} > 0 \right)$$
-
-* How long is the total level above a risk threshold,  $r$?
-
-$$g(\mathbf{s}_t; k, r) = \tfrac{1}{K\Delta{k}}\sum_{k \in K} \mathbb{1}\left(S_{t+k} + h_{t+k} > r \right)$$
 
 ## Ensemble: Total Level
 
@@ -289,49 +293,65 @@ $$g(\mathbf{s}_t; k, r) = \tfrac{1}{K\Delta{k}}\sum_{k \in K} \mathbb{1}\left(S_
 
 ## Scoring
 
-These quantitites can empircally be estimated from the raw ensemble:
+The probability of a given event can then be estimated from the $M$ ensemble members:
 
-$$ P_t \left[g(\mathbf{s}_t, \theta)\right] = \tfrac{1}{M} \sum_{m=1}^M g(\mathbf{s}^{(m)}_t, \theta), $$
-where $M$ is the number of members.
+$$ P_t \left[g(t, \theta)\right] = \tfrac{1}{M} \sum_{m=1}^M g^{(m)}(t, \theta), $$
 
-Pinson et al. 2012 suggests using a Brier Skill Score (BSS):
+Pinson et al. (2012) suggests using a Brier Score (BS):
 
-$$BSS = \dfrac{1}{T} \sum_{t = 1}^T \left( P_t \left[ g(\mathbf{s}_t, \theta) \right] - g( \mathbf{s}_t, \theta )  \right) ^2$$
+$$BS = \dfrac{1}{T} \sum_{t = 1}^T \left( P_t \left[ g(t, \theta) \right] - g( t, \theta )  \right) ^2$$
+
+## Windows Example
+
+<center>
+<img src= "slides_img/2daywindow.png" width = 90%>
+<img src= "slides_img/4day window.png" width = 90%>
 
 ## Careful
 
-<br><br>
-<font color="#00A6D6">  **Directly applying the BSS in an event based approach  can violate some basic statistical assumptions ** </font>
+In an event based approach -  
+<font color="#00A6D6">  **directly applying the BS   can violate some basic statistical assumptions ** </font>
+<br><br> 
 
-* Ignores autocorrelation (due to overlap in forecast time periods)
+## Careful
 
-* Ignores heteorskadiscity (more variability at longer lead times)
+In an event based approach -  
+<font color="#00A6D6">  **directly applying the BS   can violate some basic statistical assumptions ** </font>
+<br><br> 
 
-# Example
-
-## NGR
-
-## Univ (Rank) 
-
-## Univ (CRPS)
-
-## ECC
- 
-Want to use Methods of 
-* Boulgene
-* Möller 
-
-## Duration
-
-## Conclusions
-
-<!-- # Univariate Post-processing -->
+Dates in the windows overlap:     
+  $\quad\Rightarrow$ careful forecasts are independent   
+  $\quad\Rightarrow$ scoring ignores autocorrelation   
 
 
-<!-- ## {.fullslide} -->
+## Careful
 
-<!-- <center> -->
-<!-- <img src= "slides_img/sunset.jpg" width = 100%> -->
+In an event based approach -  
+<font color="#00A6D6">  **directly applying the BS   can violate some basic statistical assumptions ** </font>
+<br><br> 
+
+Dates in the windows overlap:     
+  $\quad\Rightarrow$ careful forecasts are independent   
+  $\quad\Rightarrow$ scoring ignores autocorrelation   
+
+More variability at longer lead times:  
+  $\quad\Rightarrow$ problem for larger windows    
+  $\quad\Rightarrow$ ignores heteorskadiscity  
+
+## Risk categories
+
+<center>
+<img src= "slides_img/risk_level_rainfall.png" width = 70%>
+
+## Conclusions 
+
+<br><br><br>
+
+* For stakeholders event based information is very **important**
+
+* How we score temporal events isn't necessary straightforward
+
+* Scoring choices are likely application dependent
 
 <script src = "assets/delft.js"></script>  
 
