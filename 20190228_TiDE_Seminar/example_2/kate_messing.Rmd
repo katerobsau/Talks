@@ -471,9 +471,9 @@ Key Points
 ## Australian Rainfall Network
 
 ```{r, echo = FALSE}
-working_dir = "/Users/saundersk1/Dropbox/Hard Drive/R/2018/ChapterCluster/"
-mainland_df = readRDS("/Users/saundersk1/Documents/Git/completionSeminar/shiny_apps/record_slider/mainland_df.rds")
-tas_df = readRDS("/Users/saundersk1/Documents/Git/completionSeminar/shiny_apps/record_slider/tas_df.rds")
+working_dir = "/Users/katesaunders/Dropbox/Hard Drive/R/2018/ChapterCluster/"
+mainland_df = readRDS("/Users/katesaunders/Documents/Git/Talks/Older/completionSeminar/shiny_apps/record_slider/mainland_df.rds")
+tas_df = readRDS("/Users/katesaunders/Documents/Git/Talks/Older/completionSeminar/shiny_apps/record_slider/tas_df.rds")
 
 coords = readRDS(paste(working_dir, "Data/region_coords.rds", sep = "")) %>% dplyr::bind_rows()
 station_plot <- ggplot(data = coords) +
@@ -832,9 +832,6 @@ Future work: Non-stationary dependence!
 <img src="kate_img/Storm_Vas.jpg">
 </center>
 
-<script src = "assets/delft.js"></script>
-
-
 ## Example
 
 Consider the <font color="2292B5">$\| x_i - x_j \|$</font> as the clustering distance.
@@ -938,3 +935,4 @@ density_eg_plot <- ggplot(plot_df) +
 ggplotly(density_eg_plot, tooltip = c("text"))
 
 ```
+<script src = "assets/delft.js"></script>
